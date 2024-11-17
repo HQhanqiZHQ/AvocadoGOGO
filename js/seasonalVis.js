@@ -156,24 +156,33 @@ class SeasonalVisualization {
             .style("gap", "30px")
             .style("margin-bottom", "20px");
 
-        // Add year selector
+        // Add year period selector
         const years = [...new Set(vis.data.map(d => d.year))].sort();
         const yearControl = controlsContainer.append("div")
             .attr("class", "control-group")
             .style("display", "flex")
-            .style("align-items", "center");
+            .style("align-items", "center")
+            .style("gap", "10px");
 
         yearControl.append("label")
-            .style("margin-right", "8px")
             .style("font-family", "ChalkboyRegular")
-            .text("Select Year:");
+            .text("Select Period:");
 
+        // Start year
         yearControl.append("select")
-            .attr("class", "year-select")
+            .attr("class", "start-year-select")
             .style("padding", "4px")
             .style("font-family", "ChalkboyRegular")
             .on("change", function () {
-                vis.selectedYear = this.value;
+                vis.startYear = +this.value;
+                // Ensure end year is not before start year
+                const endYearSelect = d3.select(".end-year-select");
+                const endYearOptions = endYearSelect.selectAll("option");
+                endYearOptions.attr("disabled", d => d < vis.startYear ? true : null);
+                if (vis.endYear < vis.startYear) {
+                    vis.endYear = vis.startYear;
+                    endYearSelect.property("value", vis.startYear);
+                }
                 vis.wrangleData();
             })
             .selectAll("option")
@@ -182,6 +191,32 @@ class SeasonalVisualization {
             .append("option")
             .attr("value", d => d)
             .text(d => d);
+
+        yearControl.append("span")
+            .text("to")
+            .style("font-family", "ChalkboyRegular");
+
+        // End year
+        yearControl.append("select")
+            .attr("class", "end-year-select")
+            .style("padding", "4px")
+            .style("font-family", "ChalkboyRegular")
+            .on("change", function () {
+                vis.endYear = +this.value;
+                vis.wrangleData();
+            })
+            .selectAll("option")
+            .data(years)
+            .enter()
+            .append("option")
+            .attr("value", d => d)
+            .text(d => d);
+
+        // Set initial values
+        vis.startYear = years[0];
+        vis.endYear = years[years.length - 1];
+        d3.select(".start-year-select").property("value", vis.startYear);
+        d3.select(".end-year-select").property("value", vis.endYear);
 
         // Add type selector with radio buttons
         const typeControl = controlsContainer.append("div")
@@ -215,7 +250,6 @@ class SeasonalVisualization {
                 .text(type);
         });
     }
-
     addZoomControls() {
         let vis = this;
 
@@ -270,27 +304,46 @@ class SeasonalVisualization {
     wrangleData() {
         let vis = this;
 
-        // Filter data based on selected year
-        let filteredData = vis.selectedYear ?
-            vis.data.filter(d => d.year === +vis.selectedYear) :
-            vis.data;
+        // Filter data based on selected period
+        let filteredData = vis.data.filter(d => {
+            const year = d.year;
+            return year >= vis.startYear && year <= vis.endYear;
+        });
 
         // Filter by selected type
         if (vis.selectedType !== 'all') {
             filteredData = filteredData.filter(d => d.type === vis.selectedType);
         }
 
-        // Process data by month
-        vis.displayData = Array.from(d3.group(filteredData, d => d.date.getMonth()),
-            ([month, values]) => ({
+        // First group by month to get monthly averages across years
+        let monthlyData = d3.group(filteredData, d => d.date.getMonth());
+
+        // Process data by month with yearly averages
+        vis.displayData = Array.from(monthlyData, ([month, values]) => {
+            // Calculate average price and volume for each month across years
+            const avgPrice = d3.mean(values, d => d.averagePrice);
+            const avgVolume = d3.mean(values, d => d.totalVolume);
+
+            return {
                 month: month,
-                avgPrice: d3.mean(values, d => d.averagePrice),
-                totalVolume: d3.sum(values, d => d.totalVolume)
-            }))
-            .sort((a, b) => a.month - b.month);
+                avgPrice: avgPrice,
+                totalVolume: avgVolume,
+                // Add additional statistics
+                priceRange: {
+                    min: d3.min(values, d => d.averagePrice),
+                    max: d3.max(values, d => d.averagePrice)
+                },
+                volumeRange: {
+                    min: d3.min(values, d => d.totalVolume),
+                    max: d3.max(values, d => d.totalVolume)
+                },
+                yearCount: new Set(values.map(d => d.year)).size
+            };
+        }).sort((a, b) => a.month - b.month);
 
         vis.updateVis();
     }
+
     updateVis() {
         let vis = this;
 
@@ -338,8 +391,46 @@ class SeasonalVisualization {
             .attr("height", d => vis.height - vis.y2(d.totalVolume))
             .attr("fill", vis.colors[vis.selectedType])
             .style("opacity", 0.3);
+        // Create line generator
+        const line = d3.line()
+            .x(d => vis.x(months[d.month]) + vis.x.bandwidth() / 2)
+            .y(d => vis.y1(d.avgPrice))
+            .curve(d3.curveMonotoneX);
 
-        // Add tooltips to bars
+        // Update line
+        const path = vis.chartGroup.selectAll(".trend-line")
+            .data([vis.displayData]);
+
+        path.exit().remove();
+
+        const pathEnter = path.enter()
+            .append("path")
+            .attr("class", "trend-line");
+
+        pathEnter.merge(path)
+            .transition().duration(1000)
+            .attr("d", line)
+            .attr("fill", "none")
+            .attr("stroke", vis.colors[vis.selectedType])
+            .attr("stroke-width", 3);
+
+        // Update points
+        const points = vis.chartGroup.selectAll(".data-point")
+            .data(vis.displayData);
+
+        points.exit().remove();
+
+        const pointsEnter = points.enter()
+            .append("circle")
+            .attr("class", "data-point");
+
+        pointsEnter.merge(points)
+            .transition().duration(1000)
+            .attr("cx", d => vis.x(months[d.month]) + vis.x.bandwidth() / 2)
+            .attr("cy", d => vis.y1(d.avgPrice))
+            .attr("r", 5)
+            .attr("fill", vis.colors[vis.selectedType]);
+        // Update tooltips to include period information
         vis.chartGroup.selectAll(".volume-bar")
             .on("mouseover", function (event, d) {
                 d3.select(this)
@@ -354,57 +445,13 @@ class SeasonalVisualization {
                     .html(`
                         <div style="font-family: ChalkboyRegular">
                             <strong>Month:</strong> ${months[d.month]}<br/>
-                            <strong>Volume:</strong> ${d3.format(",")(Math.round(d.totalVolume))}<br/>
+                            <strong>Average Volume:</strong> ${d3.format(",")(Math.round(d.totalVolume))}<br/>
+                            <strong>Volume Range:</strong> ${d3.format(",")(Math.round(d.volumeRange.min))} - ${d3.format(",")(Math.round(d.volumeRange.max))}<br/>
+                            <strong>Period:</strong> ${vis.startYear} - ${vis.endYear}<br/>
                             <strong>Type:</strong> ${vis.selectedType.charAt(0).toUpperCase() + vis.selectedType.slice(1)}
                         </div>
                     `);
-            })
-            .on("mouseout", function () {
-                d3.select(this)
-                    .style("opacity", 0.3)
-                    .attr("stroke", null);
-
-                vis.tooltip.style("opacity", 0);
             });
-
-        // Update line
-        const line = d3.line()
-            .x(d => vis.x(months[d.month]) + vis.x.bandwidth() / 2)
-            .y(d => vis.y1(d.avgPrice))
-            .curve(d3.curveMonotoneX);
-
-        const path = vis.chartGroup.selectAll(".trend-line")
-            .data([vis.displayData]);
-
-        path.exit().remove();
-
-        path.enter()
-            .append("path")
-            .attr("class", "trend-line")
-            .merge(path)
-            .transition().duration(1000)
-            .attr("d", line)
-            .attr("fill", "none")
-            .attr("stroke", vis.colors[vis.selectedType])
-            .attr("stroke-width", 3);
-
-        // Update points with tooltips
-        const points = vis.chartGroup.selectAll(".data-point")
-            .data(vis.displayData);
-
-        points.exit().remove();
-
-        const pointsEnter = points.enter()
-            .append("circle")
-            .attr("class", "data-point");
-
-        const pointsMerged = pointsEnter.merge(points)
-            .transition().duration(1000)
-            .attr("cx", d => vis.x(months[d.month]) + vis.x.bandwidth() / 2)
-            .attr("cy", d => vis.y1(d.avgPrice))
-            .attr("r", 5)
-            .attr("fill", vis.colors[vis.selectedType]);
-        // Add tooltips to points
         vis.chartGroup.selectAll(".data-point")
             .on("mouseover", function (event, d) {
                 d3.select(this)
@@ -420,20 +467,16 @@ class SeasonalVisualization {
                         <div style="font-family: ChalkboyRegular">
                             <strong>Month:</strong> ${months[d.month]}<br/>
                             <strong>Average Price:</strong> $${d.avgPrice.toFixed(2)}<br/>
+                            <strong>Price Range:</strong> $${d.priceRange.min.toFixed(2)} - $${d.priceRange.max.toFixed(2)}<br/>
+                            <strong>Period:</strong> ${vis.startYear} - ${vis.endYear}<br/>
                             <strong>Type:</strong> ${vis.selectedType.charAt(0).toUpperCase() + vis.selectedType.slice(1)}
                         </div>
                     `);
-            })
-            .on("mouseout", function () {
-                d3.select(this)
-                    .attr("r", 5)
-                    .attr("stroke", null);
-
-                vis.tooltip.style("opacity", 0);
             });
 
-        // Update legend
-        this.updateLegend();
+        // Update legend title to include period
+        vis.legend.select("text")
+            .text(`${vis.selectedType.charAt(0).toUpperCase() + vis.selectedType.slice(1)} Metrics (${vis.startYear}-${vis.endYear})`);
     }
 
     updateLegend() {
