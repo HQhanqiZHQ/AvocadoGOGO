@@ -111,3 +111,40 @@
     border: 1px solid #eee;
     padding: 20px;
 }
+
+.state {
+    transition: fill 0.3s ease, stroke 0.3s ease;
+    cursor: pointer;
+}
+
+.state:hover {
+    stroke: #000;
+    stroke-width: 2px;
+}
+
+.controls {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.controls button,
+.controls input[type="range"] {
+    font-family: 'ChalkboyRegular', sans-serif;
+}
+
+.tooltip {
+    background: white;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+    font-family: 'ChalkboyRegular', sans-serif;
+}
+
+.legend text {
+    font-family: 'ChalkboyRegular', sans-serif;
+    font-size: 12px;
+}
