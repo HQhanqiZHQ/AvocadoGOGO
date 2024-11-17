@@ -148,3 +148,76 @@
     font-family: 'ChalkboyRegular', sans-serif;
     font-size: 12px;
 }
+
+.vis-header {
+    margin-bottom: 20px;
+}
+
+.controls-container {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f8f8;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.control-group {
+    margin-bottom: 10px;
+}
+
+.control-group label {
+    margin-right: 10px;
+}
+
+.trend-line {
+    fill: none;
+    stroke-width: 2;
+}
+
+.data-point {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.axis-label {
+    font-size: 12px;
+    fill: #666;
+}
+
+.tooltip {
+    background: white;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+}
+
+.x-axis text {
+    font-size: 12px;
+}
+
+.trend-line {
+    fill: none;
+    stroke-width: 2;
+}
+
+.data-point {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.controls-container {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.tooltip {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+
+.legend text {
+    font-size: 12px;
+}
