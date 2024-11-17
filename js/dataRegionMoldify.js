@@ -85,7 +85,7 @@ let multiStates;
 d3.csv("data/avocado.csv").then(data => {
     // console.log(data[0].region)
     const uniqueRegions = [...new Set(data.map(item => item.region))];
-    console.log(uniqueRegions)
+    // console.log(uniqueRegions)
     avocado_data = data;
 
     const result1 = {};
@@ -105,6 +105,7 @@ d3.csv("data/avocado.csv").then(data => {
             // Add the row to the appropriate state array
             result1[state].push(row);
         }
+
         else if (states && states.length > 1) {  // Check if states exists and has multiple entries
             states.forEach(state => {
                 // Initialize array for state if it doesn't exist
@@ -116,7 +117,7 @@ d3.csv("data/avocado.csv").then(data => {
             });
         }
     });
-    console.log(result2)
+    // console.log(result2)
     //
     // indStates = new IndividualState(result1);
     // multiStates = new MultiStates(result2);

@@ -52,6 +52,7 @@ class AvocadoVisualization {
     processStateData() {
         const indStateData = {};
         const multiStateData = {};
+        const regionData = {};
 
         this.data.forEach(row => {
             const states = mapLocationToStates(row.region);
@@ -64,6 +65,11 @@ class AvocadoVisualization {
                 indStateData[state].push(row);
             }
             else if (states && states.length > 1) {
+                if (!regionData[row.region]) {
+                    regionData[row.region] = [];
+                }
+                regionData[row.region].push(row);
+
                 states.forEach(state => {
                     if (!multiStateData[state]) {
                         multiStateData[state] = [];
@@ -75,13 +81,15 @@ class AvocadoVisualization {
 
         this.indStateData = indStateData;
         this.multiStateData = multiStateData;
+        this.regionData = regionData;
     }
 
     initializeVisualizations() {
         try {
+
             this.priceVis = new PriceVisualization("#price-vis", this.data);
             this.indStates = new IndividualState("#state-vis", this.indStateData);
-            this.multiStates = new MultiStates("#multi-state-vis", this.multiStateData);
+            this.multiStates = new MultiStates("#multi-state-vis", this.regionData);
             this.seasonalVis = new SeasonalVisualization("#seasonal-vis", this.data);
 
             // Initial updates
