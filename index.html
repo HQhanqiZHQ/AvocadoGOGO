@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AvocadoGOGO - Avocado Price Analysis</title>
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/custom.css">
+
+    <!-- D3.js -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <!-- Custom fonts -->
+    <style>
+        @font-face {
+            font-family: 'ChalkboyRegular';
+            src: url('css/font/ChalkboyRegular-vmXe7.otf') format('opentype');
+        }
+
+        @font-face {
+            font-family: 'Doodle';
+            src: url('css/font/Doodle.ttf') format('truetype');
+        }
+
+        @font-face {
+            font-family: 'RockSlayers';
+            src: url('css/font/RockSlayers-BW6Lw.otf') format('opentype');
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navigation">
+        <div class="nav-content">
+            <h1 class="nav-title">AvocadoGOGO</h1>
+            <div class="nav-links">
+                <a href="#price">Price Analysis</a>
+                <a href="#regional">Regional Analysis</a>
+                <a href="#seasonal">Seasonal Trends</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero-section">
+        <div class="hero-content">
+            <h1>Discover Avocado Market Trends</h1>
+            <p>Explore price patterns, regional differences, and seasonal variations</p>
+        </div>
+    </section>
+
+    <!-- Price Analysis Section -->
+    <section id="price" class="analysis-section">
+        <h2>Price Analysis</h2>
+        <div id="price-vis" class="visualization"></div>
+    </section>
+
+    <!-- Regional Analysis Section -->
+    <section id="regional" class="analysis-section">
+        <h2>Regional Analysis</h2>
+        <div id="region-vis" class="visualization"></div>
+    </section>
+
+    <!-- Seasonal Trends Section -->
+    <section id="seasonal" class="analysis-section">
+        <h2>Seasonal Trends</h2>
+        <div id="seasonal-vis" class="visualization"></div>
+    </section>
+
+    <!-- Scripts -->
+    <script src="js/utils.js"></script>
+    <script src="js/priceVis.js"></script>
+    <script src="js/regionVis.js"></script>
+    <script src="js/seasonalVis.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

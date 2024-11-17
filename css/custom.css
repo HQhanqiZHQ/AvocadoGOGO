@@ -1,0 +1,686 @@
+/*THIS IS THE CSS FOR MAIN PAGE*/
+/*Load Fonts*/
+@font-face {
+    font-family: 'RockSlayers';
+    src: url('font/RockSlayers-BW6Lw.otf') format('truetype');
+}
+
+@font-face {
+    font-family: 'DoodleFont';
+    src: url('font/Doodle.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'ChalkBoy';
+    src: url('font/ChalkboyRegular-vmXe7.otf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Architects Daughter', cursive;
+    src: url('https://fonts.googleapis.com/css?family=Architects+Daughter') format('truetype');
+}
+
+/*End of Load Fonts*/
+
+body {
+    background-color: #393A4C;
+    /*padding: 10vh;*/
+    font-family: 'Architects Daughter', cursive;
+}
+
+.container-fluid {
+    border: white;
+    border-radius: 10px;
+}
+
+input,
+textarea,
+keygen,
+select,
+button,
+table,
+.hd-border,
+.tooltip,
+fieldset,
+.checkbox > input[type="checkbox"] + label:before,
+.radio > input[type="radio"] + label:before {
+    background: transparent;
+    -ms-flex-item-align: center;
+    align-self: center;
+    outline: none;
+    border: 2px solid #111111;
+    border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+    /*
+        Above is shorthand for:
+        border-top-left-radius: 255px 15px;
+        border-top-right-radius: 15px 225px;
+        border-bottom-right-radius: 225px 15px;
+        border-bottom-left-radius:15px 255px;
+        */
+}
+
+/* Headings */
+h1, h2, h3 {
+    font-family: 'RockSlayers', sans-serif;
+    color: #fff4d6;
+}
+
+h1 {
+    font-size: 4vw;
+    text-align: center;
+    margin-top: 5%; /* Adjusted top margin */
+}
+
+h2 {
+    font-size: 2vw;
+    text-align: center;
+    margin-top: 1%; /* Adjusted top margin */
+}
+
+h2.section9_title {
+    font-size: 2vw;
+    margin-top: 1%;
+    margin-left: 2%;
+    text-align: left; /* Change to left, right, or justify as per your preference */
+}
+
+h3 {
+    position: absolute; /* Position the title absolutely within the section */
+    top: 2%; /* Positioning from the top of the section */
+    left: 2%; /* Positioning from the left of the section */
+    margin: 0; /* Remove any default margin */
+    font-size: 2vw; /* Adjust font size as needed */
+    color: #fff4d6; /* Color of the title */
+}
+
+/*Page Scroll process bar*/
+.navigation_dots {
+    margin:0;
+    padding:0;
+    position:fixed;
+    right:1%;
+    list-style: none;
+    top:50%;
+    transform:translateY(-50%);
+    z-index: 10;
+}
+
+.navigation_dots li {
+    width:1vw;
+    height:1vw;
+    background: #000000;
+    border:0.3vw solid #fff4d6;
+    border-radius:50%;
+    margin-top: 2vw;
+    transition:all 0.3s ease;
+}
+
+.navigation_dots li:hover, .navigation_dots li.selected {
+    transform: scale(1.8);
+}
+
+main{
+    padding:10vh 10vw;
+}
+
+/*Welcome Page*/
+/* Full Height Sections */
+.full-height {
+    height: 100vh;
+    margin-top: 5vh; /* Added margin for spacing between sections */
+    margin-bottom: 20vh; /* Consistent bottom margin */
+}
+
+.container_welcome {
+    text-align: center;
+    background-color:#2F2F4C
+}
+
+.main-title {
+    font-size: 3vw; /* Adjust size as needed */
+    margin-top: 3vh;
+}
+
+
+.welcome_resultIMG {
+    max-width: 100%;
+    max-height: 50vh;
+}
+
+.container_welcome {
+    border-top-left-radius: 37px 140px;
+    border-top-right-radius: 23px 130px;
+    border-bottom-left-radius: 110px 19px;
+    border-bottom-right-radius: 120px 24px;
+
+    display: block;
+    position: relative;
+    border: solid 10px #fff4d6;
+    height: 83vh;
+    width: 100%;
+    font-size: 17px;
+    line-height: 50px;
+    transform: rotate(-1deg);
+    box-shadow: 3px 15px 8px -10px rgba(0, 0, 0, 0.3);
+    transition: all 0.13s ease-in;
+}
+
+.container_welcome:hover {
+    transform: translateY(-10px) rotate(1deg);
+    box-shadow: 3px 15px 8px -10px rgba(0, 0, 0, 0.3);
+}
+
+.container_welcome:hover .border {
+    transform: translateY(4px) rotate(-5deg);
+}
+
+.border {
+    width:100%;
+    position: absolute;
+    transition: all 0.13s ease-in;
+}
+
+
+/*PlaceHolder Page*/
+.buffer {
+    height:10vh;
+}
+/* Adjusting Section and Placeholder Styles */
+.section1, .section2, .section3, .section4, .section5, .section6, .section7, .section8, .section9 {
+    position: relative;
+    height: 90vh; /* Maintaining full height */
+    width:80%;
+    border: solid 10px #fff4d6;
+    background-color:#2F2F4C;
+}
+/* Placeholder Styling */
+.placeholder {
+    top: 10%; /* Adjust this to create space for the title */
+    width: 100%; /* Full width of the section */
+    height: 90%; /* Adjusted height to accommodate the title */
+    position: absolute;
+    left: 0; /* Align to the left of the section */
+    background-color: white; /* Example background color */
+    /*border: solid 5px #cecece;*/
+    transform: translateX(0%); /* Adjust as needed */
+    cursor:default;
+    opacity:1
+}
+
+/*Section Reference Circle Images*/
+.circle_image_placeholder {
+    display: flex; /* Ensures horizontal alignment */
+    justify-content: space-between; /* Distributes space between items */
+    align-items: center; /* Align items vertically */
+    width: 100%; /* Use full width of the container */
+    margin-top: 0vh; /* Adjusted top margin */
+    /*padding: 0 10px; !* Padding on the sides *!*/
+}
+
+.circle_image_placeholder_reference {
+    display: flex; /* Ensures horizontal alignment */
+    justify-content: space-between; /* Distributes space between items */
+    align-items: center; /* Align items vertically */
+    width: 100%; /* Use full width of the container */
+    margin-top: 10vh; /* Adjusted top margin */
+    /*padding: 0 10px; !* Padding on the sides *!*/
+}
+
+.circle_image {
+    width: 15vh; /* Size of the circle */
+    height: 15vh; /* Size of the circle */
+    border-radius: 50%; /* Makes the div circular */
+    overflow: hidden; /* Ensures content outside the circle is not shown */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 3vw; /* Margin on left and right of each circle */
+    background-color: white;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+}
+
+.circle_image:hover {
+    cursor: pointer;
+    transform: scale(1.3); /* Slightly increase the size on hover */
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.6), /* Inner white glow */ 0 0 2vw rgba(255, 255, 255, 0.4), /* Middle white glow */ 0 0 3vw rgba(255, 255, 255, 0.2), /* Outer white glow */ inset 0 0 4vw rgba(255, 255, 255, 0.3), /* Innermost light */ inset 10px 0 5vw rgba(255, 255, 255, 0.3); /* Side light */
+    background-image: radial-gradient(circle at center, #fff4d6, transparent), /* Central bright spot */ linear-gradient(45deg, rgba(255, 255, 255, 0.1), transparent);
+}
+
+.circle_image:hover .text_under_image{
+    transform: scale(1.3);
+}
+
+.circle_image img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%; /* Match the circle size */
+    height: 100%; /* Match the circle size */
+    object-fit: cover; /* Cover the circle area without distortion */
+    border-radius: 50%; /* Maintain the circular shape */
+    transition: opacity 0.3s ease; /* Smooth transition for the image change */
+
+}
+
+.circle_image .clara_hover-img , .circle_image .ling_hover-img, .circle_image .quan_hover-img{
+    opacity:0;
+    transition: opacity 0.3s ease;
+}
+.circle_image:hover .clara_hover-img, .circle_image:hover .ling_hover-img, .circle_image:hover .quan_hover-img{
+    opacity:1;
+}
+.circle_image:hover .clara_default-img, .circle_image:hover  .ling_default-img, .circle_image:hover .quan_default-img{
+    opacity:0;
+}
+
+/*Text under circle*/
+.circle_with_text {
+    display: flex; /* Aligns the circle and text vertically */
+    flex-direction: column; /* Stacks items vertically */
+    align-items: center; /* Center aligns items horizontally */
+}
+
+.text_under_image {
+    margin-top: 1vh; /* Space between the circle and the text */
+    color: #fff; /* Text color */
+    font-family: RockSlayers, sans-serif;
+    font-size: 1vw; /* Text size */
+    text-align: center; /* Center align text */
+}
+
+.text_under_image_reference{
+    margin-top: 0; /* Space between the circle and the text */
+    margin-left: 1vw;
+    color: #fff; /* Text color */
+    font-family: RockSlayers, sans-serif;
+    font-size: 0.7vw; /* Text size */
+    text-align: left; /* Center align text */
+
+}
+
+.circle_with_text:hover .circle_image {
+    cursor: pointer;
+    transform: scale(1.3); /* Slightly increase the size on hover */
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.6), /* Inner white glow */
+    0 0 2vw rgba(255, 255, 255, 0.4), /* Middle white glow */
+    0 0 3vw rgba(255, 255, 255, 0.2), /* Outer white glow */
+    inset 0 0 4vw rgba(255, 255, 255, 0.3), /* Innermost light */
+    inset 10px 0 5vw rgba(255, 255, 255, 0.3); /* Side light */
+    background-image: radial-gradient(circle at center, #fff4d6, transparent), /* Central bright spot */
+    linear-gradient(45deg, rgba(255, 255, 255, 0.1), transparent);
+}
+
+.circle_with_text:hover .text_under_image {
+    transform: scale(1.5); /* Scale up the text */
+    transition: transform 0.3s ease; /* Smooth transition for scaling */
+    color: #fff4d6; /* Text color */
+}
+/*End Section Reference Circle Images*/
+
+
+/* genre vis*/
+
+.section5 .tooltip {
+    font-family: 'Architects Daughter', cursive;
+    background: #fff8e4;
+}
+
+.genre-icon:hover {
+    cursor: pointer;
+}
+
+#genre-tooltip-small,
+#genre-tooltip-large,
+#radar-tooltip {
+    position: absolute;
+}
+
+#genre-tooltip-small-container,
+#genre-tooltip-large-container,
+#radar-tooltip-container {
+    padding: 20px;
+}
+
+#genre-tooltip-small-name-container,
+#genre-tooltip-large-name-container,
+#radar-tooltip-feat-container {
+    font-size: larger;
+    font-weight: bolder;
+}
+
+#genre-tooltip-large .exit-button {
+    cursor: pointer;
+    position: absolute;
+    top: 28px;
+    right: 36px;
+}
+
+/*MUSIC GENRE INTRO*/
+#genre-tooltip-large-figure-container {
+	margin: 10px;
+	display: flex;
+	justify-content: center;
+}
+
+#genre-tooltip-large .exit-button:hover {
+    opacity: 0.7;
+}
+
+.radarLabel:hover {
+    cursor: pointer;
+}
+
+#radar-tooltip {
+    background: #fff4d6;
+}
+
+
+/* TEST SELECTION */
+#genre-instruction-container,
+#genre-icon-container,
+#genre-button-container,
+#mbti-instruction-container,
+#mbti-icon-container,
+#mbti-button-container {
+	margin-bottom: 30px;
+	display: flex;
+	justify-content: center;
+}
+
+#genre-instruction-container,
+#mbti-instruction-container {
+    margin-top: 30px;
+}
+
+#main-instruction {
+	text-align: center;
+	font-size: xx-large;
+}
+
+#main-instruction-foot {
+	text-align: center;
+}
+
+#genre-instruction,
+#mbti-instruction {
+	text-align: center;
+	font-size: large;
+}
+
+#genre-instruction-foot,
+#mbti-instruction-foot {
+	text-align: center;
+	font-size: small;
+}
+
+#button-row {
+	display: flex;
+	justify-content: center;
+}
+
+.genre-button,
+.mbti-button,
+#confirm-button {
+	padding-top:3px;
+	padding-bottom: 3px;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+.genre-button,
+.mbti-button {
+    margin: 5px;
+}
+
+/*TEST RESULT*/
+
+#test-genre-vis-header,
+#test-mbti-vis-header,
+#test-genre-vis-label-positive,
+#test-mbti-vis-label-positive,
+#test-genre-vis-label-negative,
+#test-mbti-vis-label-negative {
+    font-size: larger;
+}
+
+.genre-bubble-circle:hover,
+.mbti-bubble-circle:hover,
+.genre-bubble-label:hover,
+.mbti-bubble-label:hover {
+    cursor: pointer;
+}
+
+.switch-baseline-button:hover,
+.shuffle-button:hover,
+.proceed-button:hover {
+    cursor: pointer;
+}
+
+/* * * * * * * * * * * * * *
+*       Jyuan's CSS        *
+* * * * * * * * * * * * * */
+
+/*MBTI ALL*/
+.mbti-tooltip {
+    display: none;
+    position: absolute;
+    padding: 10px;
+    z-index: 100;
+    text-align: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    border: none;
+    background-color: transparent;
+    width: 120px;
+    height: 90px;
+    color: black;
+    text-shadow: 1px 1px 2px white;
+}
+
+.mbti-img {
+    position: absolute;
+}
+
+/*MBTI DETAIL*/
+.image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50%;
+    height: 40%;
+    position: relative;
+}
+
+.mbti-info {
+    margin-left: 10px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+#mbtiDetail {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.button-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 50px;
+    width: 35%;
+    padding: 10px;
+    align-items: center;
+}
+
+.mbti-letter-button {
+    width: 80%;
+    margin: 1%;
+    padding: 10px;
+    flex: 1 0 20%;
+    background-size: cover;
+    background-position: center;
+    border: none;
+    outline: none;
+}
+
+.mbti-letter-button-selected {
+    color: #c22121;
+    font-weight: bolder;
+}
+
+.mbit-detail-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.mbti-info h3{
+    position: absolute;
+    top: 40%;
+    left: 65%;
+    margin: 0;
+    font-size: 2vw;
+    text-align: center;
+}
+
+.personalityClass {
+    color: #737373;
+    font-size: 20px;
+}
+.personality-color-sentinels {
+    color: #0ec2c7;
+    fill: #0ec2c7;
+}
+
+.personality-color-explorers {
+    color: #d0ba22;
+    fill: #d0ba22;
+}
+
+.personality-color-diplomats {
+    color: #369d60;
+    fill: #369d60;
+}
+
+.personality-color-analysts {
+    color: #3d4dbb;
+    fill: #3d4dbb;
+}
+
+.mbti-letter-button-hover {
+    transform: scale(1.2);
+    transition: transform 0.3s;
+}
+
+/*MBTI MAP*/
+.mbti-type-select {
+    border: none;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    padding-top: 7%;
+    text-align: center;
+    text-align-last: center;
+    line-height: 1.5em;
+    cursor: pointer;
+}
+#map-tooltip{
+    border: none;
+    background-color: transparent;
+    position: absolute;
+    padding-top: 50px;
+    z-index: 100;
+    text-align: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    font-size: 11px;
+    width: 240px;
+    height: 180px;
+    color: black;
+    text-shadow: 1px 1px 2px white;
+}
+
+.map-text-svg h3{
+    position: absolute;
+    font-size: 2vw;
+    text-align: center;
+}
+.map-text-svg {
+    text-align: center;
+}
+
+/*MBTI MUSIC DISTRIBUTION*/
+.music-text-svg h3{
+    position: absolute;
+    font-size: 2vw;
+    text-align: center;
+}
+.music-text-svg {
+    text-align: center;
+}
+
+.music-type-select {
+    border: none;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    padding-top: 5%;
+    text-align: center;
+    text-align-last: center;
+    line-height: 1.5em;
+    cursor: pointer;
+}
+
+option {
+    background-color: rgba(255, 255, 255, 0.5);
+    border: none;
+    cursor: pointer;
+}
+
+.select-container {
+    position: absolute;
+    z-index: 1000;
+    text-align: center;
+}
+
+/* * * * * * * * * * * * * *
+*       Lingbo's CSS        *
+* * * * * * * * * * * * * */
+/*The style for papers.js*/
+/*Selection Box Style*/
+.section4 #paperSelection {
+    position:relative;
+    font-family: RockSlayers, sans-serif; /* Ensure this font is available */
+    padding: 10px;
+    margin-top: 9%;
+    margin-left: 5%;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #fff4d6;
+    z-index:10;
+}
+
+
+.section4 .paper-group:hover{
+    cursor: pointer;
+    /*    transform: scale(1.2);
+        transform-origin: center;*/
+}
+
+
+.section4 .info-text-title {
+    font-size: 15px; /* Adjust size as needed */
+    font-weight: bold;
+    fill: black;
+}
+
+
+/* * * * * * * * * * * * * * * * * /
+*      End of Lingbo's CSS        *
+* * * * * * * * * * * * * * ** * */
