@@ -1,4 +1,3 @@
-// Icon management utilities
 const IconUtils = {
     icons: {
         avocado: '../img/icons/icon1.png',
@@ -9,11 +8,10 @@ const IconUtils = {
         trend: '../img/icons/icon6.png'
     },
 
-    // Add cursor changes on right click
+    // Add cursor changes on double click instead of right click
     initCustomCursors() {
-        // Prevent default context menu
-        document.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
+        // Change cursor on double click
+        document.addEventListener('dblclick', (e) => {
             this.cycleCursor();
         });
 
