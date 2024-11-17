@@ -117,8 +117,8 @@ d3.csv("data/avocado.csv").then(data => {
         }
     });
     console.log(result2)
-
-    indStates = new IndividualState(result1);
-    multiStates = new MultiStates(result2);
+    //
+    // indStates = new IndividualState(result1);
+    // multiStates = new MultiStates(result2);
 
 })
