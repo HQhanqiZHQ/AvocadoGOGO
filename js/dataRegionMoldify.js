@@ -1,4 +1,4 @@
-
+// dataRegionMoldigy.js
 console.log("in main")
 const locationToStateMap = {
     'Albany': ['NY'],
