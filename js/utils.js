@@ -135,3 +135,87 @@ const IconUtils = {
 document.addEventListener('DOMContentLoaded', () => {
     IconUtils.init();
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize intersection observer for sections
+    const sections = document.querySelectorAll('.full-height');
+    const navDots = document.querySelectorAll('.scroll-dot');
+
+    const observerOptions = {
+        root: null,
+        rootMargin: '-20% 0px -20% 0px', // Adjust these values to control when sections become active
+        threshold: 0.3
+    };
+
+    const sectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            // Handle section visibility
+            if (entry.isIntersecting) {
+                entry.target.classList.add('section-active');
+
+                // Update navigation dots
+                const sectionId = entry.target.id;
+                updateNavigationDots(sectionId);
+
+                // Trigger animations for elements within the section
+                const animatedElements = entry.target.querySelectorAll('.fade-in');
+                animatedElements.forEach(el => el.classList.add('visible'));
+            }
+        });
+    }, observerOptions);
+
+    // Observe all sections
+    sections.forEach(section => {
+        sectionObserver.observe(section);
+    });
+
+    // Function to update navigation dots
+    function updateNavigationDots(activeSectionId) {
+        navDots.forEach(dot => {
+            const dotSection = dot.getAttribute('data-section');
+            if (dotSection === activeSectionId) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
+    }
+
+    // Smooth scroll handler
+    document.querySelectorAll('.scroll-dot').forEach(dot => {
+        dot.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = dot.getAttribute('data-section');
+            const targetSection = document.getElementById(targetId);
+
+            if (targetSection) {
+                targetSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Optional: Add scroll-to-top button functionality
+    const scrollTopButton = document.querySelector('.scroll-btn.up-btn');
+    if (scrollTopButton) {
+        scrollTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
+
+    // Optional: Add scroll-to-bottom button functionality
+    const scrollBottomButton = document.querySelector('.scroll-btn.down-btn');
+    if (scrollBottomButton) {
+        scrollBottomButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: document.documentElement.scrollHeight,
+                behavior: 'smooth'
+            });
+        });
+    }
+});

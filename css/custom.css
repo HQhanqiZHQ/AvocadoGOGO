@@ -60,9 +60,14 @@ fieldset,
 }
 
 /* Headings */
-h1, h2, h3 {
+h1, h3{
     font-family: 'RockSlayers', sans-serif;
-    color: #fff4d6;
+        color: #eae2e2;
+}
+
+h2 {
+    font-family: 'RockSlayers', sans-serif;
+    color: #f2c9aee7;
 }
 
 h1 {
@@ -734,3 +739,236 @@ option {
 .floating-icon:nth-child(4n) {
     animation-delay: 1.5s;
 }
+
+/* Team Section Styles */
+.section9 {
+    padding: 40px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.team-title {
+    text-align: center;
+    color: #4a7337;
+    font-family: 'RockSlayers', sans-serif;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.team-title::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background-color: #4a7337;
+    margin: 10px auto;
+}
+
+/* Team Container */
+.team-container {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    margin-top: 40px;
+}
+
+/* Team Member Cards */
+.team-member-card {
+    width: 280px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+    position: relative;
+}
+
+.team-member-card:hover {
+    transform: translateY(-10px);
+}
+
+/* Profile Container */
+.profile-container {
+    position: relative;
+    width: 100%;
+    height: 280px;
+    overflow: hidden;
+}
+
+.profile-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+/* Avocado Overlay */
+.avocado-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(74, 115, 55, 0.2);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.team-member-card:hover .avocado-overlay {
+    opacity: 1;
+}
+
+.overlay-icon {
+    width: 60px;
+    height: 60px;
+    animation: float 3s ease-in-out infinite;
+}
+
+/* Member Info */
+.member-info {
+    padding: 20px;
+    text-align: center;
+}
+
+.member-info h4 {
+    color: #4a7337;
+    font-family: 'RockSlayers', sans-serif;
+    margin: 0;
+}
+
+.member-info p {
+    color: #6c757d;
+    margin: 5px 0;
+    font-family: 'ChalkboyRegular', sans-serif;
+}
+
+/* Reference Section */
+.reference-section {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.reference-card {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.avocado-icon {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.icon-float {
+    width: 40px;
+    height: 40px;
+    animation: float 3s ease-in-out infinite;
+}
+
+.reference-list {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+.reference-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid #e9ecef;
+    color: #6c757d;
+    font-family: 'ChalkboyRegular', sans-serif;
+}
+
+/* Animations */
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .team-container {
+        gap: 20px;
+    }
+
+    .team-member-card {
+        width: 100%;
+        max-width: 280px;
+    }
+}
+
+.narrative-block {
+    margin: 2rem 0;
+    max-width: 800px;
+    line-height: 1.6;
+}
+
+.interesting-fact {
+    background: rgba(74, 115, 55, 0.1);
+    border-left: 4px solid #4a7337;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 0 4px 4px 0;
+}
+
+.key-points,
+.seasonal-tips {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+.member-quote {
+    font-style: italic;
+    color: #666;
+    margin-top: 1rem;
+}
+
+.time-analysis {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.lead {
+    font-size: 1.4rem;
+    color: #4a7337;
+    margin-bottom: 2rem;
+}
+
+.intro-narrative {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 2rem 0;
+}
+
+.analysis-notes {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+.regional-insight {
+    border: 1px solid #ddd;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+    background: #fff;
+}
+

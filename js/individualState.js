@@ -2,183 +2,93 @@ class IndividualState {
     constructor(parentElement, data) {
         this.parentElement = parentElement;
         this.data = data;
-        this.displayData = data;
-        this.currentView = 'map'; // 'map' or 'table'
-        this.selectedYear = '2018';
-        this.selectedMetric = 'price'; // 'price' or 'volume'
-        this.selectedType = 'all'; // 'all', 'organic', 'conventional'
         this.initVis();
     }
 
     initVis() {
         let vis = this;
 
-        // Set up dimensions
-        const container = d3.select(vis.parentElement).node().getBoundingClientRect();
-        vis.margin = { top: 60, right: 200, bottom: 60, left: 60 };
-        vis.width = container.width - vis.margin.left - vis.margin.right;
-        vis.height = container.height - vis.margin.top - vis.margin.bottom;
+        // Create title and container for the table
+        vis.container = d3.select(vis.parentElement)
+            .append("div")
+            .attr("class", "state-price-container")
+            .style("padding", "10px");
 
-        // Create SVG
-        vis.svg = d3.select(vis.parentElement)
-            .append("svg")
-            .attr("width", "100%")
-            .attr("height", "100%")
-            .attr("viewBox", `0 0 ${container.width} ${container.height}`)
-            .append("g")
-            .attr("transform", `translate(${vis.margin.left},${vis.margin.top})`);
-
-        // Create title
-        vis.svg.append("text")
-            .attr("class", "vis-title")
-            .attr("x", vis.width / 2)
-            .attr("y", -30)
-            .attr("text-anchor", "middle")
+        // Add title
+        vis.container.append("h3")
+            .style("text-align", "center")
             .style("font-family", "RockSlayers")
-            .style("font-size", "24px")
-            .text("Avocado Prices Across States");
+            .style("color", "#4a7337")
+            .text("Avocado Prices by State");
 
-        // Add controls
-        vis.addControls();
+        // Create year selector
+        this.addYearSelector();
 
-        // Initialize map projection
-        vis.projection = d3.geoAlbersUsa()
-            .translate([vis.width / 2, vis.height / 2])
-            .scale(vis.width);
+        // Create table container
+        vis.tableContainer = vis.container.append("div")
+            .attr("class", "table-container")
+            .style("max-height", "400px")
+            .style("overflow-y", "auto")
+            .style("margin-top", "20px");
 
-        vis.path = d3.geoPath()
-            .projection(vis.projection);
-
-        // Create color scales
-        vis.priceColorScale = d3.scaleSequential(d3.interpolateGreens)
-            .domain([0, 3]); // Typical price range
-
-        vis.volumeColorScale = d3.scaleSequential(d3.interpolateGreens)
-            .domain([0, 1000000]); // Adjust based on your volume range
-
-        // Initialize tooltip
-        vis.tooltip = d3.select("body").append("div")
-            .attr("class", "tooltip")
-            .style("opacity", 0)
-            .style("position", "absolute")
-            .style("background", "white")
-            .style("padding", "10px")
-            .style("border", "1px solid #ddd")
-            .style("border-radius", "5px")
-            .style("font-family", "ChalkboyRegular");
-
-        // Load US map data
-        Promise.all([
-            d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json"),
-            d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json")
-        ]).then(([us]) => {
-            vis.usStates = topojson.feature(us, us.objects.states).features;
-            vis.stateBorders = topojson.mesh(us, us.objects.states, (a, b) => a !== b);
-            vis.wrangleData();
-        });
+        this.wrangleData();
     }
 
-    addControls() {
+    addYearSelector() {
         let vis = this;
 
-        const controls = d3.select(vis.parentElement)
-            .append("div")
-            .attr("class", "controls")
-            .style("position", "absolute")
-            .style("top", "10px")
-            .style("right", "10px");
+        // Get available years
+        const years = [...new Set(Object.values(vis.data)
+            .flatMap(stateData => stateData.map(d => d.year)))].sort();
 
-        // View toggle
-        controls.append("button")
-            .attr("class", "view-toggle")
-            .style("margin", "5px")
+        // Create selector container
+        const selectorContainer = vis.container.append("div")
+            .style("text-align", "center")
+            .style("margin", "20px 0");
+
+        // Add label
+        selectorContainer.append("label")
+            .style("font-family", "ChalkboyRegular")
+            .style("margin-right", "10px")
+            .text("Select Year: ");
+
+        // Add select element
+        selectorContainer.append("select")
             .style("padding", "5px 10px")
             .style("font-family", "ChalkboyRegular")
-            .text("Switch View")
-            .on("click", () => {
-                vis.currentView = vis.currentView === 'map' ? 'table' : 'map';
-                vis.updateVis();
-            });
-
-        // Year slider
-        controls.append("div")
-            .attr("class", "year-control")
-            .style("margin", "10px")
-            .html(`
-                <label style="font-family: ChalkboyRegular">Year: 
-                    <input type="range" min="2015" max="2018" value="2018" step="1">
-                    <span class="year-display">2018</span>
-                </label>
-            `)
-            .on("input", function () {
-                vis.selectedYear = this.value;
-                this.querySelector(".year-display").textContent = this.value;
-                vis.wrangleData();
-            });
-
-        // Metric toggle
-        const metricToggle = controls.append("div")
-            .attr("class", "metric-toggle")
-            .style("margin", "10px");
-
-        ["Price", "Volume"].forEach(metric => {
-            metricToggle.append("label")
-                .style("margin", "0 10px")
-                .style("font-family", "ChalkboyRegular")
-                .html(`
-                    <input type="radio" name="metric" value="${metric.toLowerCase()}" 
-                           ${metric.toLowerCase() === vis.selectedMetric ? 'checked' : ''}>
-                    ${metric}
-                `);
-        });
-
-        metricToggle.selectAll("input")
             .on("change", function () {
-                vis.selectedMetric = this.value;
+                vis.selectedYear = +this.value;
                 vis.wrangleData();
-            });
+            })
+            .selectAll("option")
+            .data(years)
+            .enter()
+            .append("option")
+            .attr("value", d => d)
+            .text(d => d);
 
-        // Type selector
-        const typeSelector = controls.append("div")
-            .style("margin", "10px");
-
-        ["All", "Organic", "Conventional"].forEach(type => {
-            typeSelector.append("label")
-                .style("margin", "0 10px")
-                .style("font-family", "ChalkboyRegular")
-                .html(`
-                    <input type="radio" name="type" value="${type.toLowerCase()}" 
-                           ${type.toLowerCase() === vis.selectedType ? 'checked' : ''}>
-                    ${type}
-                `);
-        });
-
-        typeSelector.selectAll("input")
-            .on("change", function () {
-                vis.selectedType = this.value;
-                vis.wrangleData();
-            });
+        // Set initial year
+        vis.selectedYear = years[years.length - 1];
     }
 
     wrangleData() {
         let vis = this;
 
-        // Filter data based on selected year and type
-        vis.filteredData = {};
-        Object.entries(vis.data).forEach(([state, data]) => {
-            const filteredStateData = data.filter(d => {
-                const matchesYear = d.year === +vis.selectedYear;
-                const matchesType = vis.selectedType === 'all' || d.type === vis.selectedType;
-                return matchesYear && matchesType;
-            });
+        // Process data for each state
+        vis.tableData = Object.entries(vis.data).map(([state, stateData]) => {
+            const yearData = stateData.filter(d => d.year === vis.selectedYear);
 
-            if (filteredStateData.length > 0) {
-                vis.filteredData[state] = {
-                    avgPrice: d3.mean(filteredStateData, d => d.averagePrice),
-                    totalVolume: d3.sum(filteredStateData, d => d.totalVolume)
-                };
-            }
-        });
+            const avgPrice = d3.mean(yearData, d => d.averagePrice);
+            const avgVolume = d3.mean(yearData, d => d.totalVolume);
+
+            return {
+                state: state,
+                avgPrice: avgPrice || 0,
+                avgVolume: avgVolume || 0,
+                hasData: yearData.length > 0
+            };
+        }).filter(d => d.hasData)  // Only keep states with data
+            .sort((a, b) => b.avgPrice - a.avgPrice);  // Sort by price descending
 
         vis.updateVis();
     }
@@ -186,124 +96,70 @@ class IndividualState {
     updateVis() {
         let vis = this;
 
-        if (vis.currentView === 'map') {
-            // Update map visualization
-            const states = vis.svg.selectAll(".state")
-                .data(vis.usStates);
+        // Create table
+        const table = vis.tableContainer.selectAll("table").data([0]);
+        const tableEnter = table.enter()
+            .append("table")
+            .style("width", "100%")
+            .style("border-collapse", "collapse")
+            .style("font-family", "ChalkboyRegular");
 
-            // Enter + Update
-            states.join("path")
-                .attr("class", "state")
-                .attr("d", vis.path)
-                .attr("fill", d => {
-                    const stateData = vis.filteredData[d.properties.name];
-                    if (!stateData) return "#ccc";
-                    return vis.selectedMetric === 'price'
-                        ? vis.priceColorScale(stateData.avgPrice)
-                        : vis.volumeColorScale(stateData.totalVolume);
-                })
-                .on("mouseover", function (event, d) {
-                    const stateData = vis.filteredData[d.properties.name];
-                    if (stateData) {
-                        d3.select(this)
-                            .attr("stroke", "#000")
-                            .attr("stroke-width", 2);
+        // Update table header
+        const header = tableEnter.append("thead")
+            .append("tr");
 
-                        vis.tooltip
-                            .style("opacity", 1)
-                            .html(`
-                                <div style="font-family: ChalkboyRegular">
-                                    <strong>${d.properties.name}</strong><br/>
-                                    Average Price: $${stateData.avgPrice.toFixed(2)}<br/>
-                                    Total Volume: ${d3.format(",")(Math.round(stateData.totalVolume))}
-                                </div>
-                            `)
-                            .style("left", (event.pageX + 10) + "px")
-                            .style("top", (event.pageY - 10) + "px");
-                    }
-                })
-                .on("mouseout", function () {
-                    d3.select(this)
-                        .attr("stroke", null)
-                        .attr("stroke-width", null);
-                    vis.tooltip.style("opacity", 0);
-                });
+        header.selectAll("th")
+            .data(["State", "Average Price", "Average Volume"])
+            .enter()
+            .append("th")
+            .style("background-color", "#4a7337")
+            .style("color", "white")
+            .style("padding", "10px")
+            .text(d => d);
 
-            // Add state borders
-            vis.svg.selectAll(".state-borders")
-                .data([vis.stateBorders])
-                .join("path")
-                .attr("class", "state-borders")
-                .attr("d", vis.path)
-                .attr("fill", "none")
-                .attr("stroke", "#fff")
-                .attr("stroke-width", 0.5);
+        // Update table body
+        const tbody = table.merge(tableEnter).selectAll("tbody")
+            .data([vis.tableData]);
 
-        } else {
-            // Update table visualization
-            // Implementation for table view...
-        }
+        const tbodyEnter = tbody.enter()
+            .append("tbody");
 
-        // Update legend
-        vis.updateLegend();
-    }
+        // Update rows
+        const rows = tbody.merge(tbodyEnter).selectAll("tr")
+            .data(d => d);
 
-    updateLegend() {
-        let vis = this;
+        const rowsEnter = rows.enter()
+            .append("tr")
+            .style("cursor", "pointer")
+            .style("transition", "background-color 0.3s");
 
-        // Remove old legend
-        vis.svg.selectAll(".legend").remove();
+        // Hover effect
+        rowsEnter
+            .on("mouseover", function () {
+                d3.select(this).style("background-color", "#f0f7ed");
+            })
+            .on("mouseout", function () {
+                d3.select(this).style("background-color", "white");
+            });
 
-        // Create new legend
-        const legend = vis.svg.append("g")
-            .attr("class", "legend")
-            .attr("transform", `translate(${vis.width + 10}, 20)`);
+        // Update cells
+        const cells = rows.merge(rowsEnter).selectAll("td")
+            .data(d => [
+                d.state,
+                `$${d.avgPrice.toFixed(2)}`,
+                d3.format(",")(Math.round(d.avgVolume))
+            ]);
 
-        const scale = vis.selectedMetric === 'price' ? vis.priceColorScale : vis.volumeColorScale;
-        const title = vis.selectedMetric === 'price' ? 'Price ($)' : 'Volume';
+        cells.enter()
+            .append("td")
+            .merge(cells)
+            .style("padding", "8px")
+            .style("border-bottom", "1px solid #ddd")
+            .style("text-align", (d, i) => i === 0 ? "left" : "right")
+            .text(d => d);
 
-        // Add gradient
-        const gradientHeight = 200;
-        const gradientWidth = 20;
-
-        legend.append("text")
-            .attr("x", 0)
-            .attr("y", -10)
-            .style("font-family", "ChalkboyRegular")
-            .text(title);
-
-        const gradient = legend.append("defs")
-            .append("linearGradient")
-            .attr("id", "legend-gradient")
-            .attr("x1", "0%")
-            .attr("x2", "0%")
-            .attr("y1", "0%")
-            .attr("y2", "100%");
-
-        const numStops = 10;
-        for (let i = 0; i < numStops; i++) {
-            const offset = i / (numStops - 1);
-            gradient.append("stop")
-                .attr("offset", `${offset * 100}%`)
-                .attr("stop-color", scale(scale.domain()[1] * (1 - offset)));
-        }
-
-        legend.append("rect")
-            .attr("width", gradientWidth)
-            .attr("height", gradientHeight)
-            .style("fill", "url(#legend-gradient)");
-
-        // Add scale ticks
-        const ticks = scale.domain();
-        ticks.forEach((tick, i) => {
-            legend.append("text")
-                .attr("x", gradientWidth + 5)
-                .attr("y", gradientHeight * (1 - i / (ticks.length - 1)))
-                .style("font-family", "ChalkboyRegular")
-                .style("font-size", "12px")
-                .text(vis.selectedMetric === 'price'
-                    ? `$${tick.toFixed(2)}`
-                    : d3.format(",")(tick));
-        });
+        // Exit
+        rows.exit().remove();
+        cells.exit().remove();
     }
 }

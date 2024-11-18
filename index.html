@@ -25,73 +25,189 @@
     <!-- Navigation -->
     <nav class="scroll-nav">
         <button class="scroll-btn up-btn" aria-label="Scroll Up">↑</button>
+        <!-- Update the scroll-dots div in the navigation -->
         <div class="scroll-dots">
             <button class="scroll-dot" data-section="welcome"></button>
             <button class="scroll-dot" data-section="price"></button>
             <button class="scroll-dot" data-section="states"></button>
             <button class="scroll-dot" data-section="multi"></button>
             <button class="scroll-dot" data-section="seasonal"></button>
+            <button class="scroll-dot" data-section="team"></button>
         </div>
         <button class="scroll-btn down-btn" aria-label="Scroll Down">↓</button>
     </nav>
 
     <main>
-        <!-- Welcome Section -->
-        <section id="welcome" class="full-height">
-            <div class="container">
-                <div class="welcome-content">
-                    <h1>AvocadoGOGO</h1>
-                    <p>Explore avocado price trends across the United States</p>
+<!-- Welcome Section -->
+<section id="welcome" class="full-height">
+    <div class="container">
+        <div class="welcome-content text-center">
+            <h1>AvocadoGOGO</h1>
+            <p class="lead">Explore avocado sales and prices trend across the United States</p>
+            <div class="intro-narrative">
+                <p>Welcome to a journey through America's growing love affair with avocados. From toast to guacamole,
+                    this humble fruit has become a staple in American households. But what drives its price? How do
+                    consumption patterns vary across the country? Join us as we uncover the fascinating story behind
+                    this green gold.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Price Analysis Section -->
+<section id="price" class="full-height">
+    <div class="container">
+        <div class="section-content">
+            <h2>Price Analysis</h2>
+            <div class="narrative-block">
+                <p>The story of avocado prices is one of supply, demand, and seasonal rhythms. Over the years,
+                    prices have shown remarkable volatility, influenced by factors ranging from weather conditions
+                    to changing consumer preferences. Let's explore what drives these price fluctuations.</p>
+                <div class="key-points">
+                    <h4>What Affects Avocado Prices?</h4>
+                    <ul>
+                        <li>Seasonal harvest cycles</li>
+                        <li>Transportation distances</li>
+                        <li>Growing consumer demand</li>
+                        <li>Weather conditions in growing regions</li>
+                    </ul>
                 </div>
             </div>
-        </section>
+            <div id="price-vis" class="visualization"></div>
+            <div class="insight-block">
+                <p>Notice how prices tend to peak during summer months when demand is highest, while falling
+                    during winter. This pattern tells us about both consumer behavior and supply chain dynamics.</p>
+            </div>
+        </div>
+    </div>
+</section>
 
-        <!-- Price Analysis Section -->
-        <section id="price" class="full-height">
-            <div class="container">
-                <div class="section-content">
-                    <h2>Price Analysis</h2>
-                    <div id="price-vis" class="visualization"></div>
+<!-- Individual States Analysis -->
+<section id="states" class="full-height">
+    <div class="container">
+        <div class="section-content">
+            <h2>State Analysis</h2>
+            <div class="narrative-block">
+                <p>America's appetite for avocados isn't uniform across states. Cultural preferences, population
+                    demographics, and proximity to growing regions all play crucial roles in consumption patterns.</p>
+                <div class="interesting-fact">
+                    <p>Did you know? California, despite being a major producer, is also the largest consumer of
+                        avocados in the United States. This reflects both its large population and its deep-rooted
+                        avocado culture.</p>
                 </div>
             </div>
-        </section>
+            <div id="state-vis" class="visualization"></div>
+            <div class="analysis-notes">
+                <p>The visualization reveals striking regional differences. Coastal states typically show higher
+                    consumption rates, while some inland states are just beginning to develop a taste for avocados.</p>
+            </div>
+        </div>
+    </div>
+</section>
 
-        <!-- Individual States Analysis -->
-        <section id="states" class="full-height">
-            <div class="container">
-                <div class="section-content">
-                    <h2>State Analysis</h2>
-                    <div id="state-vis" class="visualization"></div>
+<!-- Multi-State Analysis -->
+<section id="multi" class="full-height">
+    <div class="container">
+        <div class="section-content">
+            <h2>Regional Comparison</h2>
+            <div class="narrative-block">
+                <p>Regional patterns tell us about more than just preferences - they reveal the evolution of
+                    America's food culture. As we compare regions, we see how avocado consumption has spread
+                    from West to East, creating new market dynamics along the way.</p>
+                <div class="regional-insight">
+                    <p>The West Coast led the avocado trend, but the Northeast has shown the fastest growth
+                        in recent years, suggesting changing dietary preferences and increased availability.</p>
                 </div>
             </div>
-        </section>
+            <div id="multi-state-vis" class="visualization"></div>
+            <div class="slider-container">
+                <div class="slider-labels">
+                    <span>Date range: </span>
+                    <span id="range-value">Jan 2015 - Dec 2017</span>
+                </div>
+                <div id="range-slider-region"></div>
+            </div>
+            <div class="time-analysis">
+                <p>Use the slider to explore how regional consumption patterns have evolved over time. Notice
+                    how special events like Super Bowl Sunday create nationwide spikes in demand.</p>
+            </div>
+        </div>
+    </div>
+</section>
 
-        <!-- Multi-State Analysis -->
-        <section id="multi" class="full-height">
-            <div class="container">
-                <div class="section-content">
-                    <h2>Regional Comparison</h2>
-                    <div id="multi-state-vis" class="visualization"></div>
-                    <div class="slider-container">
-                        <div class="slider-labels">
-                            <span>Date range: </span>
-                            <span id="range-value">Jan 2015 - Dec 2017</span>
-                        </div>
-                        <div id="range-slider-region"></div>
+<!-- Seasonal Analysis -->
+<section id="seasonal" class="full-height">
+    <div class="container">
+        <div class="section-content">
+            <h2>Seasonal Trends</h2>
+            <div class="narrative-block">
+                <p>Avocados follow nature's calendar, creating predictable yet complex patterns in availability
+                    and pricing. Understanding these patterns can help consumers make smarter purchasing decisions.</p>
+                <div class="seasonal-tips">
+                    <h4>Smart Shopping Guide</h4>
+                    <ul>
+                        <li>Best prices typically found in fall months</li>
+                        <li>Peak quality during summer season</li>
+                        <li>Plan ahead for holiday gatherings</li>
+                    </ul>
+                </div>
+            </div>
+            <div id="seasonal-vis" class="visualization"></div>
+            <div class="seasonal-insights">
+                <p>The data reveals clear seasonal patterns that repeat year after year. Being aware of these
+                    cycles can help you plan your purchases and even save money.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team Section -->
+<section id="team" class="full-height">
+    <div class="container">
+        <div class="section-content">
+            <h2>Meet Our Team</h2>
+            <div class="narrative-block">
+                <p>Behind every data point is a story, and behind every visualization is a team passionate about
+                    telling these stories. Our journey through avocado data has been as much about understanding
+                    numbers as it is about understanding people's changing relationships with food.</p>
+            </div>
+            <div class="team-container">
+                <!-- Team Member 1 -->
+                <div class="team-member-card">
+                    <div class="member-info">
+                        <h4>Hanqi(Hanna) Zeng</h4>
+                        <p>Data Engineer</p>
+                        <p>Favorite: Large Avocados</p>
+                        <p class="member-quote">"Data tells stories that words alone cannot express."</p>
+                    </div>
+                </div>
+
+                <!-- Team Member 2 -->
+                <div class="team-member-card">
+                    <div class="member-info">
+                        <h4>Tianshu(Rose) Luo</h4>
+                        <p>Data Scientist</p>
+                        <p>Favorite: Organic Avocados</p>
+                        <p class="member-quote">"Every dataset holds hidden patterns waiting to be discovered."</p>
                     </div>
                 </div>
             </div>
-        </section>
 
-        <!-- Seasonal Analysis -->
-        <section id="seasonal" class="full-height">
-            <div class="container">
-                <div class="section-content">
-                    <h2>Seasonal Trends</h2>
-                    <div id="seasonal-vis" class="visualization"></div>
+            <div class="reference-section mt-5">
+                <div class="reference-card">
+                    <h4>Data Sources & Methodology</h4>
+                    <p>Our analysis is based on comprehensive data from the Hass Avocado Board Statistics,
+                        ensuring accuracy and reliability in our findings. We've processed millions of data points
+                        to bring you these insights into America's avocado consumption patterns.</p>
+                    <ul class="reference-list">
+                        <li>Hass Avocado Board Statistics - Primary data source</li>
+                        <li>Our methodology prioritizes data accuracy and meaningful insights</li>
+                    </ul>
                 </div>
             </div>
-        </section>
+        </div>
+    </div>
+</section>
     </main>
 
     <!-- Scripts -->
