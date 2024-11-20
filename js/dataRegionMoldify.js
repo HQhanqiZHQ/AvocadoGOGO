@@ -3,7 +3,7 @@ console.log("in main")
 const locationToStateMap = {
     'Albany': ['NY'],
     'Atlanta': ['GA'],
-    'BaltimoreWashington': ['MD', 'DC', 'VA'],
+    'BaltimoreWashington': ['MD', 'DC', 'VA', 'WV'],
     'Boise': ['ID'],
     'Boston': ['MA'],
     'BuffaloRochester': ['NY'],
@@ -53,7 +53,7 @@ const locationToStateMap = {
     'Syracuse': ['NY'],
     'Tampa': ['FL'],
     'TotalUS': ['ALL'],
-    'West': ['CA', 'OR', 'WA', 'NV', 'ID', 'MT', 'WY', 'UT', 'CO', 'AZ', 'NM'],
+    'West': ['OR', 'WA', 'NV', 'ID', 'MT', 'WY', 'UT', 'CO', 'AZ', 'NM', 'AZ'],
     'WestTexNewMexico': ['TX', 'NM']
 };
 
@@ -116,6 +116,7 @@ d3.csv("data/avocado.csv").then(data => {
                 result2[state].push(row);
             });
         }
+
     });
     // console.log(result2)
     //

@@ -56,13 +56,28 @@ class AvocadoVisualization {
 
         this.data.forEach(row => {
             const states = mapLocationToStates(row.region);
-
+            // console.log(states)
+            if (states[0] === 'CA'){
+                // console.log(states)
+                const state = states[0];
+                if (!multiStateData[state]) {
+                    multiStateData[state] = [];
+                }
+                multiStateData[state].push(row);
+            }
             if (states && states.length === 1) {
                 const state = states[0];
                 if (!indStateData[state]) {
                     indStateData[state] = [];
                 }
                 indStateData[state].push(row);
+
+                if (states[0] === 'CA'){
+                    if (!regionData[row.region]) {
+                        regionData[row.region] = [];
+                    }
+                    regionData[row.region].push(row);
+                }
             }
             else if (states && states.length > 1) {
                 if (!regionData[row.region]) {

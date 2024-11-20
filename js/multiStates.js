@@ -64,7 +64,7 @@ class MultiStates {
             .style("font-family", "ChalkboyRegular");
 
         vis.regionStatesMap = {
-            'BaltimoreWashington': ['Maryland', 'Virginia', 'District of Columbia'],
+            'BaltimoreWashington': ['Maryland', 'Virginia', 'District of Columbia', 'West Virginia'],
             'GreatLakes': ['Wisconsin', 'Illinois', 'Michigan', 'Indiana', 'Ohio'],
             'HartfordSpringfield': ['Connecticut', 'Massachusetts'],
             'Midsouth': ['Tennessee', 'Kentucky'],
@@ -74,9 +74,12 @@ class MultiStates {
             'Plains': ['Minnesota', 'Iowa', 'Missouri', 'Kansas', 'Nebraska', 'South Dakota', 'North Dakota'],
             'SouthCentral': ['Texas', 'Oklahoma', 'Arkansas'],
             'Southeast': ['North Carolina', 'South Carolina', 'Georgia', 'Florida'],
-            'West': ['California', 'Nevada', 'Oregon', 'Washington', 'Idaho', 'Montana', 'Wyoming', 'Utah', 'Colorado'],
-            'WestTexNewMexico': ['New Mexico', 'West Texas']
+            'West': ['California', 'Nevada', 'Oregon', 'Washington', 'Idaho', 'Montana', 'Wyoming', 'Utah', 'Colorado', 'Arizona'],
+            'WestTexNewMexico': ['New Mexico', 'Texas'],
+            'California':['California']
+
         };
+
         vis.stateRegionMap = {};
         Object.entries(vis.regionStatesMap).forEach(([region, states]) => {
             states.forEach(state => {
@@ -90,10 +93,20 @@ class MultiStates {
             d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json"),
             d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json")
         ]).then(([us]) => {
-            vis.usStates = topojson.feature(us, us.objects.states).features;
+            // vis.usStates = topojson.feature(us, us.objects.states).features;
+            vis.usStates = topojson.feature(us, us.objects.states).features
+                .filter(d => {
+                    const state = vis.getStateName(d);  // Implement this helper function
+                    return state !== 'Alaska' && state !== 'Hawaii';
+                });
             vis.stateBorders = topojson.mesh(us, us.objects.states, (a, b) => a !== b);
             vis.wrangleData();
         });
+        vis.getStateName = function(feature) {
+            // You'll need to implement this based on your data structure
+            // It should return the state name from the feature properties
+            return feature.properties.name;
+        };
     }
 
     initSlider() {
@@ -305,6 +318,7 @@ class MultiStates {
 
         // Helper function to show tooltip with updated info
         function showTooltip(region, event) {
+            // console.log(region)
             if (!tooltipFixed || currentRegion !== region) {
                 const regionData = vis.regionSummaries[region];
                 if (!regionData) return;
@@ -352,7 +366,7 @@ class MultiStates {
             .on("mouseover", function(event, d) {
                 const stateName = d.properties.name;
                 const region = vis.stateRegionMap[stateName];
-
+                console.log(d)
                 if (region && vis.regionSummaries[region]) {
                     if (currentRegion !== region) {
                         tooltipFixed = false;
