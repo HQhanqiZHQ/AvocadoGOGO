@@ -4,6 +4,8 @@ class MultiStates {
         this.parentElement = parentElement;
         this.data = data;
         this.displayData = data;
+        this.startMonth = 0;
+        this.endMonth = 3;
         this.initVis();
     }
 
@@ -93,7 +95,6 @@ class MultiStates {
             d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json"),
             d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json")
         ]).then(([us]) => {
-            // vis.usStates = topojson.feature(us, us.objects.states).features;
             vis.usStates = topojson.feature(us, us.objects.states).features
                 .filter(d => {
                     const state = vis.getStateName(d);  // Implement this helper function
@@ -110,17 +111,19 @@ class MultiStates {
     }
 
     initSlider() {
+
         let vis = this;
+
         const slider = document.getElementById('range-slider-region');
         const rangeValue = document.getElementById('range-value');
         let isDragging = false;
         let dragStartX = 0;
         let startValues = [];
 
-        const MIN_RANGE = 5;
+        const MIN_RANGE = 2;
 
         function sliderToDataMonth(sliderValue) {
-            const monthOffset = 11; // December = 11 (0-based)
+            const monthOffset = 0; // December = 11 (0-based)
             const yearOffset = 2015;
 
             const sliderMonth = Math.round(sliderValue) - 1;
@@ -235,6 +238,7 @@ class MultiStates {
                 }
             });
         }
+
     }
 
     wrangleData() {
@@ -246,6 +250,7 @@ class MultiStates {
 
         Object.entries(vis.data).forEach(([region, regionData]) => {
             // Filter data by time range
+            // console.log(region)
             const timeFilteredData = regionData.filter(d => {
                 const date = new Date(d.date);
                 const monthIndex = (date.getFullYear() - 2015) * 12 + date.getMonth();
@@ -256,7 +261,7 @@ class MultiStates {
                 // Calculate averages and totals for the filtered time period
                 const avgPrice = d3.mean(timeFilteredData, d => d.averagePrice);
                 const totalVolume = d3.sum(timeFilteredData, d => d.totalVolume);
-
+                // console.log( vis.regionStatesMap[region], region)
                 // Apply the same values to all states in the region
                 vis.regionStatesMap[region].forEach(state => {
                     vis.filteredData[state] = {
@@ -273,12 +278,13 @@ class MultiStates {
         });
         vis.regionSummaries = {};
         Object.entries(vis.data).forEach(([region, regionData]) => {
+            // console.log(regionData, vis.startMonth, vis.endMonth)
             const timeFilteredData = regionData.filter(d => {
                 const date = new Date(d.date);
                 const monthIndex = (date.getFullYear() - 2015) * 12 + date.getMonth();
                 return monthIndex >= vis.startMonth && monthIndex <= vis.endMonth;
             });
-
+            // console.log(timeFilteredData)
             vis.regionSummaries[region] = {
                 avgPrice: d3.mean(timeFilteredData, d => d.averagePrice),
                 totalVolume: d3.sum(timeFilteredData, d => d.totalVolume),
@@ -287,7 +293,7 @@ class MultiStates {
                 xLargeBags: d3.sum(timeFilteredData, d => d.xLargeBags)
             };
         });
-
+        // console.log(vis.regionSummaries)
         vis.updateVis();
     }
 
@@ -321,11 +327,12 @@ class MultiStates {
             // console.log(region)
             if (!tooltipFixed || currentRegion !== region) {
                 const regionData = vis.regionSummaries[region];
-                if (!regionData) return;
-
-                const dateStart = new Date(2015, vis.startMonth % 12);
+                // if (!regionData) return;
+                console.log(region)
+                console.log(regionData)
+                const dateStart = new Date(2015+Math.floor(vis.endMonth / 12), vis.startMonth % 12);
                 const dateEnd = new Date(2015 + Math.floor(vis.endMonth / 12), vis.endMonth % 12);
-
+                // console.log(vis.startMonth)
                 vis.tooltip
                     .style("opacity", 1)
                     .html(`
@@ -418,8 +425,9 @@ class MultiStates {
     }
 
     updateTimeRange(start, end) {
-        this.startMonth = Math.round(start);
-        this.endMonth = Math.round(end);
+        let vis = this;
+        vis.startMonth = Math.round(start);
+        vis.endMonth = Math.round(end);
         console.log(this.endMonth, this.startMonth)
         this.wrangleData();
     }

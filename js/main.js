@@ -73,10 +73,10 @@ class AvocadoVisualization {
                 indStateData[state].push(row);
 
                 if (states[0] === 'CA'){
-                    if (!regionData[row.region]) {
+                    if (!regionData[row.region] && row.region === 'California') {
                         regionData[row.region] = [];
                     }
-                    regionData[row.region].push(row);
+                    regionData['California'].push(row);
                 }
             }
             else if (states && states.length > 1) {
@@ -93,7 +93,7 @@ class AvocadoVisualization {
                 });
             }
         });
-
+        console.log(regionData)
         this.indStateData = indStateData;
         this.multiStateData = multiStateData;
         this.regionData = regionData;
