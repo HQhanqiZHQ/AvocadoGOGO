@@ -249,6 +249,6 @@ class AvocadoVisualization {
 document.addEventListener('DOMContentLoaded', () => {
     console.log("DOM loaded, initializing application...");
     const app = new AvocadoVisualization();
-    // Initialize icon utilities
-    IconUtils.init();
+    // // Initialize icon utilities
+    // IconUtils.init();
 });
