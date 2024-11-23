@@ -93,7 +93,7 @@ class AvocadoVisualization {
                 });
             }
         });
-        console.log(regionData)
+        // console.log(regionData)
         this.indStateData = indStateData;
         this.multiStateData = multiStateData;
         this.regionData = regionData;
@@ -106,12 +106,13 @@ class AvocadoVisualization {
             this.indStates = new IndividualState("#state-vis", this.indStateData);
             this.multiStates = new MultiStates("#multi-state-vis", this.regionData);
             this.seasonalVis = new SeasonalVisualization("#seasonal-vis", this.data);
-
+            this.treeVis = new TreeVis("#tree-vis", this.regionData);
             // Initial updates
             this.priceVis.updateVis();
             this.indStates.updateVis();
-            this.multiStates.updateVis();
+            // this.multiStates.updateVis();
             this.seasonalVis.updateVis();
+            this.treeVis.updateVis();
         } catch (error) {
             console.error("Error initializing visualizations:", error);
         }
