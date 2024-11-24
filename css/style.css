@@ -224,3 +224,118 @@
     font-size: 12px;
 }
 
+#tree-vis {
+    width: 100%;
+    height: 80vh;  /* Set to 80% of viewport height */
+    min-height: 600px;  /* Ensure minimum height */
+    position: relative;
+    overflow: visible;
+}
+
+#tree .section-content {
+    height: 100%;
+    padding: 2rem 0;
+}
+
+.season-label {
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+}
+
+.leaf {
+    transition: stroke-width 0.2s ease, filter 0.2s ease;
+}
+
+.leaf:hover {
+    filter: brightness(1.1);
+}
+
+.volume-bar {
+    rx: 4px;  /* Horizontal corner radius */
+    ry: 4px;  /* Vertical corner radius */
+    transition: opacity 0.2s ease;
+    shape-rendering: geometricPrecision; /* Makes edges smoother */
+}
+
+/* Optional hover effect with smooth transition */
+.volume-bar:hover {
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+/* Avocado-colored axes styling */
+.x-axis,
+.y-axis {
+    shape-rendering: geometricPrecision;
+    color: #568203; /* Avocado green for text */
+}
+
+.x-axis path,
+.y-axis path,
+.x-axis line,
+.y-axis line {
+    stroke: #568203; /* Avocado green for lines */
+    stroke-width: 1.5px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* Matching text colors */
+.chart-title,
+.y-axis-label {
+    shape-rendering: geometricPrecision;
+    font-smooth: always;
+    -webkit-font-smoothing: antialiased;
+    fill: #568203; /* Avocado green for titles and labels */
+}
+
+.x-axis text,
+.y-axis text {
+    shape-rendering: geometricPrecision;
+    font-smooth: always;
+    -webkit-font-smoothing: antialiased;
+    fill: #568203; /* Avocado green for axis text */
+}
+
+/* Tooltip styling */
+.tooltip {
+    position: absolute;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.95); /* Semi-transparent white background */
+    border: 1px solid #568203;
+    border-radius: 4px;
+    pointer-events: none;
+    font-size: 12px;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    backdrop-filter: blur(2px); /* Slight blur effect for background */
+}
+
+/* Text outline effect in tooltip */
+.tooltip {
+    color: #000;
+    text-shadow:
+            -1px -1px 0 white,
+            1px -1px 0 white,
+            -1px 1px 0 white,
+            1px 1px 0 white;
+}
+
+/* You can also style specific parts of the tooltip text */
+.tooltip .label {
+    font-weight: bold;
+    color: #568203;
+    text-shadow:
+            -1px -1px 0 rgba(255, 255, 255, 0.8),
+            1px -1px 0 rgba(255, 255, 255, 0.8),
+            -1px 1px 0 rgba(255, 255, 255, 0.8),
+            1px 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.tooltip .value {
+    color: #333;
+    text-shadow:
+            -1px -1px 0 rgba(255, 255, 255, 0.8),
+            1px -1px 0 rgba(255, 255, 255, 0.8),
+            -1px 1px 0 rgba(255, 255, 255, 0.8),
+            1px 1px 0 rgba(255, 255, 255, 0.8);
+}
