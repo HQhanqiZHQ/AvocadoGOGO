@@ -63,7 +63,7 @@ class PriceVisualization {
             .attr("y", -60)
             .attr("transform", "rotate(-90)")
             .style("text-anchor", "middle")
-            .style("font-family", "ChalkboyRegular")
+            .style("font-family", "Patrick Hand")
             .text("Price ($)");
 
         vis.svg.append("text")
@@ -71,7 +71,7 @@ class PriceVisualization {
             .attr("x", vis.width / 2)
             .attr("y", vis.height + 40)
             .style("text-anchor", "middle")
-            .style("font-family", "ChalkboyRegular")
+            .style("font-family", "Patrick Hand")
             .text("Date");
 
         // Add type selector
@@ -93,7 +93,7 @@ class PriceVisualization {
             .style("background", d => d === vis.currentType ? "#4a7337" : "white")
             .style("color", d => d === vis.currentType ? "white" : "#4a7337")
             .style("cursor", "pointer")
-            .style("font-family", "ChalkboyRegular")
+            .style("font-family", "Patrick Hand")
             .text(d => d.charAt(0).toUpperCase() + d.slice(1))
             .on("click", function (event, d) {
                 vis.currentType = d;
@@ -112,7 +112,7 @@ class PriceVisualization {
             .style("padding", "10px")
             .style("border", "1px solid #ddd")
             .style("border-radius", "5px")
-            .style("font-family", "ChalkboyRegular");
+            .style("font-family", "Patrick Hand");
 
         // Add clip path for smooth transitions
         vis.svg.append("defs").append("clipPath")
@@ -223,7 +223,8 @@ class PriceVisualization {
             .style("text-anchor", "end")
             .attr("dx", "-.8em")
             .attr("dy", ".15em")
-            .attr("transform", "rotate(-45)");
+            .attr("transform", "rotate(-45)")
+            .style("font-size", "0.8em");
 
         vis.yAxisG
             .transition()
