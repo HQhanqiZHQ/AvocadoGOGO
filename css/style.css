@@ -339,3 +339,75 @@
             -1px 1px 0 rgba(255, 255, 255, 0.8),
             1px 1px 0 rgba(255, 255, 255, 0.8);
 }
+
+
+
+/*slider*/
+
+/* Basic noUiSlider styling */
+.noUi-target {
+    background: rgba(198, 232, 202, 0.63) !important; /* Light green background */
+    border: none !important;
+    box-shadow: none !important;
+    height: 8px;
+    border-radius: 4px;
+}
+
+/* Handle styling for both handles */
+.noUi-handle[data-handle="0"],
+.noUi-handle[data-handle="1"] {
+    background-image: url('/img/icons/avocado slider.png');
+    background-size: contain; /* Make image fit the handle */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: transparent; /* Remove background color */
+    border: none;
+    cursor: pointer;
+    height: 40px !important; /* Adjust based on your image size */
+    width: 40px !important;
+    right: -15px !important;
+    top: -12px !important; /* Center vertically relative to track */
+    box-shadow: none;
+}
+
+/* Remove default handle lines */
+.noUi-handle::before,
+.noUi-handle::after {
+    display: none;
+}
+/* Connect (selected range) styling */
+.noUi-connect {
+    background: #8bc34a !important; /* Lighter green for the track */
+}
+
+
+/* Active state */
+.noUi-active {
+    transform: scale(1.15);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+
+
+/* Pips/markers styling if you're using them */
+.noUi-marker {
+    background: #c8e6c9;
+}
+
+.noUi-value {
+    color: #568203;
+    font-size: 12px;
+}
+
+/* Disabled state */
+[disabled].noUi-target,
+[disabled] .noUi-handle {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Focus state */
+.noUi-handle:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(86, 130, 3, 0.2);
+}
