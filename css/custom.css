@@ -1,32 +1,76 @@
 /*THIS IS THE CSS FOR MAIN PAGE*/
 /*Load Fonts*/
+/* Update font imports */
+@import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Caveat&family=Short+Stack&family=Gloria+Hallelujah&display=swap');
+
+/* Keep your existing RockSlayers for headings if you like */
 @font-face {
     font-family: 'RockSlayers';
     src: url('font/RockSlayers-BW6Lw.otf') format('truetype');
 }
 
-@font-face {
-    font-family: 'DoodleFont';
-    src: url('font/Doodle.ttf') format('truetype');
-}
-
-@font-face {
-    font-family: 'ChalkBoy';
-    src: url('font/ChalkboyRegular-vmXe7.otf') format('truetype');
-}
-
-@font-face {
-    font-family: 'Architects Daughter', cursive;
-    src: url('https://fonts.googleapis.com/css?family=Architects+Daughter') format('truetype');
-}
-
-/*End of Load Fonts*/
-
+/* Update body default font */
 body {
     background-color: #393A4C;
-    /*padding: 10vh;*/
-    font-family: 'Architects Daughter', cursive;
+    font-family: 'Patrick Hand';  /* New default font */
 }
+
+/* Welcome section styles */
+.container_welcome {
+    border: solid 10px #c8e6c9;
+    background-color: #2F2F4C;
+}
+
+/* Main title */
+.container_welcome h1 {
+    color: #568203 ;  /* Light cream color */
+    margin-bottom: 30px;
+}
+
+/* "To fruit market owners" text */
+.container_welcome .lead {
+    color: #8bc34a;  /* Light green color */
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+}
+
+/* Main narrative text */
+.container_welcome .intro-narrative p {
+    color:  #8bc34a;
+    font-size: 1.2rem;
+    line-height: 1.8;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+
+
+.container_welcome p,
+.welcome-content .lead{
+    text-align: left;
+    font-family: 'Caveat';
+}
+.welcome-content .intro-narrative p {
+    font-family: 'Caveat';
+    font-size: 1.2rem;
+    line-height: 1.8;
+    letter-spacing: 0.02em;
+}
+
+/* Keep RockSlayers for headings */
+h1, h2, h3 {
+    font-family: 'Patrick Hand';
+}
+
+/* Narrative text styles */
+.narrative-block p,
+.interesting-fact p,
+.analysis-notes p,
+.regional-insight p {
+    font-family: 'Patrick Hand';
+}
+/*End of Load Fonts*/
+
 
 .container-fluid {
     border: white;
@@ -138,11 +182,11 @@ main{
 
 .container_welcome {
     text-align: center;
-    background-color:#2F2F4C
+    background-color:white;
 }
 
 .main-title {
-    font-size: 3vw; /* Adjust size as needed */
+    font-size: 3vw;
     margin-top: 3vh;
 }
 
