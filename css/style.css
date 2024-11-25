@@ -411,3 +411,69 @@
     outline: none;
     box-shadow: 0 0 0 3px rgba(86, 130, 3, 0.2);
 }
+
+/* Container for transitional messages */
+/*.container_message {*/
+/*    background-color: #fff;*/
+/*    border-radius: 15px;*/
+/*    padding: 30px;*/
+/*    margin: 20px;*/
+/*    box-shadow: 0 4px 6px rgba(0,0,0,0.1);*/
+/*    transition: all 0.3s ease;*/
+/*}*/
+
+/* Transition text styling */
+.transition-text {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1.2rem;
+    color: #568203;
+    margin: 20px 0;
+    line-height: 1.6;
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto 30px auto;
+}
+
+/* Section headers */
+.section-content h2 {
+    font-family: 'RockSlayers', 'Patrick Hand', cursive;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 2.5rem;
+}
+
+/* Animation for section transitions */
+.section-content {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease;
+}
+
+.section-content.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Consistent narrative block styling */
+.narrative-block {
+    background-color: rgba(86, 130, 3, 0.05);
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+.narrative-block p {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #333;
+}
+
+.price-area {
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.price-area:hover {
+    opacity: 1;
+}

@@ -61,7 +61,7 @@ class MultiStates {
             .style("padding", "10px")
             .style("border", "1px solid #ddd")
             .style("border-radius", "5px")
-            .style("font-family", "ChalkboyRegular");
+            .style("font-family", "Patrick Hand");
 
         // Add table container
         vis.tableContainer = d3.select(vis.parentElement)
@@ -425,7 +425,7 @@ class MultiStates {
         vis.tooltip
             .style("opacity", 1)
             .html(`
-                <div style="font-family: ChalkboyRegular">
+                <div style="font-family: 'Patrick Hand'">
                     <strong>${region} Region</strong><br/>
                     <strong>Period: ${dateStart.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} - 
                               ${dateEnd.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</strong><br/>

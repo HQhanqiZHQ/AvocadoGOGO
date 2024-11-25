@@ -95,7 +95,7 @@ class SeasonalVisualization {
             .attr("y", -vis.margin.left + 20)
             .attr("x", -vis.height / 2)
             .attr("text-anchor", "middle")
-            .style("font-family", "ChalkboyRegular")
+            .style("font-family", "Patrick Hand")
             .text("Price ($)");
 
         vis.chartGroup.append("text")
@@ -104,7 +104,7 @@ class SeasonalVisualization {
             .attr("y", -vis.width - vis.margin.right + 20)
             .attr("x", vis.height / 2)
             .attr("text-anchor", "middle")
-            .style("font-family", "ChalkboyRegular")
+            .style("font-family", "Patrick Hand")
             .text("Volume");
 
         // Add legend
@@ -138,7 +138,7 @@ class SeasonalVisualization {
             .style("border", "1px solid #ddd")
             .style("border-radius", "5px")
             .style("pointer-events", "none")
-            .style("font-family", "ChalkboyRegular")
+            .style("font-family", "Patrick Hand")
             .style("z-index", "10");
 
         // Initial data processing
@@ -165,14 +165,14 @@ class SeasonalVisualization {
             .style("gap", "10px");
 
         yearControl.append("label")
-            .style("font-family", "ChalkboyRegular")
+            .style("font-family", "Patrick Hand")
             .text("Select Period:");
 
         // Start year
         yearControl.append("select")
             .attr("class", "start-year-select")
             .style("padding", "4px")
-            .style("font-family", "ChalkboyRegular")
+            .style("font-family", "Patrick Hand")
             .on("change", function () {
                 vis.startYear = +this.value;
                 // Ensure end year is not before start year
@@ -194,13 +194,13 @@ class SeasonalVisualization {
 
         yearControl.append("span")
             .text("to")
-            .style("font-family", "ChalkboyRegular");
+            .style("font-family", "Patrick Hand");
 
         // End year
         yearControl.append("select")
             .attr("class", "end-year-select")
             .style("padding", "4px")
-            .style("font-family", "ChalkboyRegular")
+            .style("font-family", "Patrick Hand")
             .on("change", function () {
                 vis.endYear = +this.value;
                 vis.wrangleData();
@@ -226,7 +226,7 @@ class SeasonalVisualization {
             .style("gap", "15px");
 
         typeControl.append("label")
-            .style("font-family", "ChalkboyRegular")
+            .style("font-family", "Patrick Hand")
             .text("Select Type:");
 
         ['All', 'Organic', 'Conventional'].forEach(type => {
@@ -234,7 +234,7 @@ class SeasonalVisualization {
                 .style("display", "flex")
                 .style("align-items", "center")
                 .style("gap", "4px")
-                .style("font-family", "ChalkboyRegular");
+                .style("font-family", "Patrick Hand");
 
             label.append("input")
                 .attr("type", "radio")
@@ -443,7 +443,7 @@ class SeasonalVisualization {
                     .style("left", (event.pageX + 10) + "px")
                     .style("top", (event.pageY - 10) + "px")
                     .html(`
-                        <div style="font-family: ChalkboyRegular">
+                        <div style="font-family: Patrick Hand">
                             <strong>Month:</strong> ${months[d.month]}<br/>
                             <strong>Average Volume:</strong> ${d3.format(",")(Math.round(d.totalVolume))}<br/>
                             <strong>Volume Range:</strong> ${d3.format(",")(Math.round(d.volumeRange.min))} - ${d3.format(",")(Math.round(d.volumeRange.max))}<br/>
@@ -464,7 +464,7 @@ class SeasonalVisualization {
                     .style("left", (event.pageX + 10) + "px")
                     .style("top", (event.pageY - 10) + "px")
                     .html(`
-                        <div style="font-family: ChalkboyRegular">
+                        <div style="font-family: Patrick Hand">
                             <strong>Month:</strong> ${months[d.month]}<br/>
                             <strong>Average Price:</strong> $${d.avgPrice.toFixed(2)}<br/>
                             <strong>Price Range:</strong> $${d.priceRange.min.toFixed(2)} - $${d.priceRange.max.toFixed(2)}<br/>
@@ -489,7 +489,7 @@ class SeasonalVisualization {
         vis.legend.append("text")
             .attr("x", 0)
             .attr("y", 0)
-            .style("font-family", "ChalkboyRegular")
+            .style("font-family", "Patrick Hand")
             .style("font-weight", "bold")
             .text(`${vis.selectedType.charAt(0).toUpperCase() + vis.selectedType.slice(1)} Metrics`);
 
@@ -508,7 +508,7 @@ class SeasonalVisualization {
         priceLegend.append("text")
             .attr("x", 30)
             .attr("y", 5)
-            .style("font-family", "ChalkboyRegular")
+            .style("font-family", "Patrick Hand")
             .text("Price");
 
         // Add volume bar item
@@ -524,7 +524,7 @@ class SeasonalVisualization {
         volumeLegend.append("text")
             .attr("x", 30)
             .attr("y", 15)
-            .style("font-family", "ChalkboyRegular")
+            .style("font-family", "Patrick Hand")
             .text("Volume");
     }
 }

@@ -48,14 +48,14 @@ class IndividualState {
 
         // Add label
         selectorContainer.append("label")
-            .style("font-family", "ChalkboyRegular")
+            .style("font-family", "Patrick Hand")
             .style("margin-right", "10px")
             .text("Select Year: ");
 
         // Add select element
         selectorContainer.append("select")
             .style("padding", "5px 10px")
-            .style("font-family", "ChalkboyRegular")
+            .style("font-family", "Patrick Hand")
             .on("change", function () {
                 vis.selectedYear = +this.value;
                 vis.wrangleData();
@@ -102,7 +102,7 @@ class IndividualState {
             .append("table")
             .style("width", "100%")
             .style("border-collapse", "collapse")
-            .style("font-family", "ChalkboyRegular");
+            .style("font-family", "Patrick Hand");
 
         // Update table header
         const header = tableEnter.append("thead")
@@ -115,7 +115,8 @@ class IndividualState {
             .style("background-color", "#4a7337")
             .style("color", "white")
             .style("padding", "10px")
-            .text(d => d);
+            .text(d => d)
+            .style("text-align", "left");
 
         // Update table body
         const tbody = table.merge(tableEnter).selectAll("tbody")
@@ -155,7 +156,7 @@ class IndividualState {
             .merge(cells)
             .style("padding", "8px")
             .style("border-bottom", "1px solid #ddd")
-            .style("text-align", (d, i) => i === 0 ? "left" : "right")
+            .style("text-align", (d, i) => i === 0 ? "left" : "left")
             .text(d => d);
 
         // Exit

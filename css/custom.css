@@ -23,30 +23,14 @@ body {
 
 /* Main title */
 .container_welcome h1 {
-    color: #568203 ;  /* Light cream color */
     margin-bottom: 30px;
 }
 
 /* "To fruit market owners" text */
 .container_welcome .lead {
-    color: #8bc34a;  /* Light green color */
     font-size: 2.6rem;
     margin-bottom: 20px;
 }
-
-/* Main narrative text */
-.container_welcome .intro-narrative p {
-    color:  #8bc34a;
-    font-size: 1.9rem;
-    line-height: 1.8;
-    max-width: 800px;
-    margin: 0 auto;
-    font-family: 'Caveat';
-    line-height: 1.8;
-    letter-spacing: 0.02em;
-}
-
-
 
 .container_welcome p,
 .welcome-content .lead{
@@ -103,7 +87,7 @@ fieldset,
 /* Headings */
 h1, h3{
     font-family: 'RockSlayers', sans-serif;
-        color: #eae2e2;
+        color: #fbe2e2;
 }
 
 h2 {
@@ -515,8 +499,8 @@ main{
 
 .lead {
     font-size: 1.4rem;
-    color: #4a7337;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
+    align : "center"
 }
 
 .intro-narrative {
