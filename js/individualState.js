@@ -24,6 +24,9 @@ class IndividualState {
         // Create year selector
         this.addYearSelector();
 
+        // Create sort button and current rank display
+        this.addSortButton();
+
         // Create table container
         vis.tableContainer = vis.container.append("div")
             .attr("class", "table-container")
@@ -70,7 +73,34 @@ class IndividualState {
         // Set initial year
         vis.selectedYear = years[years.length - 1];
     }
+    addSortButton() {
+        let vis = this;
 
+        // Create sort button and current rank container
+        const sortButtonContainer = vis.container.append("div")
+            .style("text-align", "center")
+            .style("margin", "20px 0");
+
+        // Add sort button
+        vis.sortButton = sortButtonContainer.append("button")
+            .style("padding", "5px 10px")
+            .style("font-family", "Patrick Hand")
+            .text("Switch to Rank of Price/Volume")
+            .on("click", function () {
+                vis.sortBy = vis.sortBy === "avgPrice" ? "avgVolume" : "avgPrice";
+                vis.updateButtonText();
+                vis.wrangleData();
+            });
+
+        // Add current rank display
+        vis.currentRankDisplay = sortButtonContainer.append("span")
+            .style("margin-left", "20px")
+            .style("font-family", "Patrick Hand");
+    }
+    updateButtonText() {
+        let vis = this;
+        vis.sortButton.text(`Switch to Rank of ${vis.sortBy === "avgPrice" ? "Volume" : "Price"}`);
+    }
     wrangleData() {
         let vis = this;
 
@@ -88,11 +118,31 @@ class IndividualState {
                 hasData: yearData.length > 0
             };
         }).filter(d => d.hasData)  // Only keep states with data
-            .sort((a, b) => b.avgPrice - a.avgPrice);  // Sort by price descending
+            .sort((a, b) => {
+                if (!vis.sortBy) {
+                    return b.avgPrice - a.avgPrice;  // Default sort by price descending
+                } else if (vis.sortBy === "avgPrice") {
+                    return b.avgPrice - a.avgPrice;
+                } else {
+                    return b.avgVolume - a.avgVolume;
+                }
+            });
+
+        // Update current rank display
+        this.updateCurrentRankDisplay();
 
         vis.updateVis();
     }
-
+    updateCurrentRankDisplay(state = null) {
+        let vis = this;
+        let currentRank;
+        if (state) {
+            currentRank = vis.tableData.findIndex(d => d.state === state) + 1;
+        } else {
+            currentRank = vis.tableData.findIndex(d => d.state === vis.selectedState) + 1;
+        }
+        vis.currentRankDisplay.text(`Current Rank: ${currentRank}`);
+    }
     updateVis() {
         let vis = this;
 
@@ -132,15 +182,14 @@ class IndividualState {
         const rowsEnter = rows.enter()
             .append("tr")
             .style("cursor", "pointer")
-            .style("transition", "background-color 0.3s");
-
-        // Hover effect
-        rowsEnter
-            .on("mouseover", function () {
+            .style("transition", "background-color 0.3s")
+            .on("mouseover", function (event, d) {
                 d3.select(this).style("background-color", "#f0f7ed");
+                vis.updateCurrentRankDisplay(d.state);
             })
             .on("mouseout", function () {
                 d3.select(this).style("background-color", "white");
+                vis.updateCurrentRankDisplay();
             });
 
         // Update cells
