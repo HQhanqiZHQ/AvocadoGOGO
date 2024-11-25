@@ -42,7 +42,7 @@ class PriceVisualization {
         // Add after creating SVG
         vis.svg.append("text")
             .attr("class", "chart-title")
-            .attr("x", vis.width / 2)
+            .attr("x", vis.width / 4)
             .attr("y", -20)
             .attr("text-anchor", "middle")
             .style("font-family", "Patrick Hand")
