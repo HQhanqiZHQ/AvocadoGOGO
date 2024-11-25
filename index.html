@@ -63,6 +63,11 @@
                         Let's explore how seasons affect the avocado market through this intuitive tree visualization.</p>
                     <div id="tree-vis" class="visualization"></div>
                 </div>
+                <div class="narrative-special">
+                    <p class="transition-text"> This reveals intriguing seasonal patterns in avocado sales volumes. While one might expect fall, representing the harvest season, to show the highest volumes, the data tells a different story.
+                         Over the three years analyzed, fall volumes decreased significantly compared to other seasons, contrary to intuition. This counterintuitive trend suggests complex factors at play beyond simple harvest cycles, such as changing consumer preferences, market dynamics, and supply chain influences that shape avocado consumption patterns.
+                    </p>
+                </div>
             </div>
         </section>
 
@@ -72,8 +77,8 @@
     <div class="container">
         <div class="section-content">
             <h2>Price Analysis</h2>
-            <p class="transition-text">Now that we understand the seasonal patterns,
-                let's dive into how these patterns affect prices.</p>
+            <p class="transition-text">Now that we understand the seasonal patterns. With this understanding of seasonal sales patterns,
+                let's now dive deeper into how these cycles influence avocado prices.</p>
             <div class="narrative-block">
                 <p>The story of avocado prices is one of supply, demand, and seasonal rhythms. Over the years,
                     prices have shown remarkable volatility, influenced by factors ranging from weather conditions
@@ -103,7 +108,8 @@
         <div class="section-content">
             <h2>State Analysis</h2>
             <div class="narrative-block">
-                <p>America's appetite for avocados isn't uniform across states. Cultural preferences, population
+                <p>While seasonal factors play a significant role, avocado consumption also varies notably by region and state.
+                    America's appetite for avocados isn't uniform across states. Cultural preferences, population
                     demographics, and proximity to growing regions all play crucial roles in consumption patterns.</p>
                 <div class="interesting-fact">
                     <p>Did you know? California, despite being a major producer, is also the largest consumer of
@@ -149,32 +155,31 @@
     </div>
 </section>
 
-<!-- Seasonal Analysis -->
+<!-- Relation Analysis -->
 <section id="seasonal" class="full-height">
     <div class="container">
         <div class="section-content">
-            <h2>Seasonal Trends</h2>
+            <h2>Avocado Price and Volume: Seasonal Insights</h2>
             <div class="narrative-block">
-                <p>Avocados follow nature's calendar, creating predictable yet complex patterns in availability
-                    and pricing. Understanding these patterns can help consumers make smarter purchasing decisions.</p>
-                <div class="seasonal-tips">
-                    <h4>Smart Shopping Guide</h4>
-                    <ul>
-                        <li>Best prices typically found in fall months</li>
-                        <li>Peak quality during summer season</li>
-                        <li>Plan ahead for holiday gatherings</li>
+                <p>This is going to reveal a dynamic interplay between avocado prices and sales volumes throughout the year.</p>
+            </div>
+            <div id="correlation-vis" class="visualization"></div>
+            <div class="narrative-block">
+                <div class="seasonal-insights">
+                    <ul>Here are the key takeaways:
+                        <li>Fall months offer the best prices, as the peak harvest season boosts supply.</li>
+                        <li>Summer brings the highest quality avocados, perfect for avocado aficionados.</li>
+                        <li>Prices surge during holidays like Cinco de Mayo and July 4th due to increased demand.</li>
+                        <li>Strategic purchasing based on these patterns can help you optimize quality, cost, and availability.</li>
                     </ul>
                 </div>
             </div>
-            <div id="seasonal-vis" class="visualization"></div>
-            <div class="seasonal-insights">
-                <p>The data reveals clear seasonal patterns that repeat year after year. Being aware of these
-                    cycles can help you plan your purchases and even save money.</p>
+            <div class="seasonal-summary">
+                <p>By understanding these rhythms, you can make informed decisions and get the most out of your avocado purchases year-round.</p>
             </div>
         </div>
     </div>
 </section>
-
 <!-- Team Section -->
 <section id="team" class="full-height">
     <div class="container">
@@ -231,7 +236,7 @@
     <script src="js/regionVis.js"></script>
     <script src="js/individualState.js"></script>
     <script src="js/multiStates.js"></script>
-    <script src="js/seasonalVis.js"></script>
+    <script src="js/correlationVis.js"></script>
     <script src="js/treeVis.js"></script>
     <script src="js/main.js"></script>
     <script src="js/utils.js"></script>

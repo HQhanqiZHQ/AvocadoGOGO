@@ -1,4 +1,4 @@
-class SeasonalVisualization {
+class CorrelationVis {
     constructor(parentElement, data) {
         this.parentElement = parentElement;
         this.data = data;
@@ -101,7 +101,7 @@ class SeasonalVisualization {
         vis.chartGroup.append("text")
             .attr("class", "y-axis-label-right")
             .attr("transform", "rotate(90)")
-            .attr("y", -vis.width - vis.margin.right + 20)
+            .attr("y", -vis.width - vis.margin.right + 140)
             .attr("x", vis.height / 2)
             .attr("text-anchor", "middle")
             .style("font-family", "Patrick Hand")
@@ -376,7 +376,14 @@ class SeasonalVisualization {
         // Update bars with tooltips
         const bars = vis.chartGroup.selectAll(".volume-bar")
             .data(vis.displayData);
+        vis.chartGroup.selectAll(".volume-bar")
+            .on("mouseout", function (event, d) {
+                d3.select(this)
+                    .style("opacity", 0.3)
+                    .attr("stroke", "none");
 
+                vis.tooltip.style("opacity", 0);
+            });
         bars.exit().remove();
 
         const barsEnter = bars.enter()
@@ -417,6 +424,14 @@ class SeasonalVisualization {
         // Update points
         const points = vis.chartGroup.selectAll(".data-point")
             .data(vis.displayData);
+        vis.chartGroup.selectAll(".data-point")
+            .on("mouseout", function (event, d) {
+                d3.select(this)
+                    .attr("r", 5)
+                    .attr("stroke", "none");
+
+                vis.tooltip.style("opacity", 0);
+            });
 
         points.exit().remove();
 

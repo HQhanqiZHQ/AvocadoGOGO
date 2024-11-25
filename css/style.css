@@ -109,7 +109,7 @@
 }
 
 /* Visualization-specific styles */
-#price-vis, #state-vis, #multi-state-vis, #seasonal-vis {
+#price-vis, #state-vis, #multi-state-vis, #correlation-vis{
     border: 1px solid #eee;
     padding: 0px;
 }
@@ -467,6 +467,18 @@
     font-size: 1.1rem;
     line-height: 1.6;
     color: #333;
+}
+
+.narrative-special {
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+narrative-special p{
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1.1rem;
+    line-height: 1.6;
 }
 
 .price-area {
