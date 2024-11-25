@@ -28,7 +28,7 @@ class SeasonalVisualization {
             .style("font-family", "RockSlayers")
             .style("color", "#4a7337")
             .style("margin", "0")
-            .text("Seasonal Trends in Avocado Market");
+            .text("Price VS Sales Volumes");
 
         // Add controls container
         vis.controlsDiv = d3.select(vis.parentElement)
