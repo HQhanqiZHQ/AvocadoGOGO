@@ -106,10 +106,10 @@ class MultiStates {
         vis.regionStatesMap = {
             'BaltimoreWashington': ['Maryland', 'Virginia', 'District of Columbia', 'West Virginia'],
             'GreatLakes': ['Wisconsin', 'Illinois', 'Michigan', 'Indiana', 'Ohio'],
-            'HartfordSpringfield': ['Connecticut', 'Massachusetts'],
+            'HartfordSpringfield': ['Connecticut', 'Massachusetts', 'Rhode Island'],
             'Midsouth': ['Tennessee', 'Kentucky'],
             'NewOrleansMobile': ['Louisiana', 'Mississippi', 'Alabama'],
-            'Northeast': ['New York', 'New Jersey', 'Pennsylvania'],
+            'Northeast': ['New York', 'New Jersey', 'Pennsylvania', 'Delaware'],
             'NorthernNewEngland': ['Maine', 'New Hampshire', 'Vermont'],
             'Plains': ['Minnesota', 'Iowa', 'Missouri', 'Kansas', 'Nebraska', 'South Dakota', 'North Dakota'],
             'SouthCentral': ['Texas', 'Oklahoma', 'Arkansas'],
