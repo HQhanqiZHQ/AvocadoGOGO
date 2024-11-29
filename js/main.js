@@ -104,7 +104,7 @@ class AvocadoVisualization {
 
             this.priceVis = new PriceVisualization("#price-vis", this.data);
             this.indStates = new IndividualState("#state-vis", this.indStateData);
-            this.multiStates = new MultiStates("#multi-state-vis", this.regionData);
+            this.multiStates = new MultiStates("#multi-state-vis", this.regionData, this.indStateData);
             this.correlationVis = new CorrelationVis("#correlation-vis", this.data);
             this.treeVis = new TreeVis("#tree-vis", this.regionData);
             // Initial updates

@@ -1,17 +1,18 @@
 class MultiStates {
-    constructor(parentElement, data) {
+    constructor(parentElement, regionData, stateData) {
         this.parentElement = parentElement;
-        this.data = data;
-        this.displayData = data;
+        this.data = regionData;
+        this.stateData = stateData;
         this.startMonth = 0;
         this.endMonth = 3;
         this.selectedRegion = null;
+        this.selectedMetric = 'volume'; // Default metric
         this.initVis();
     }
 
     initVis() {
         let vis = this;
-
+        console.log(this.stateData)
         // Set up chart dimensions
         const container = d3.select(vis.parentElement).node().getBoundingClientRect();
         vis.margin = { top: 60, right: container.width * 0.4, bottom: 60, left: 80 }; // Set right margin to 40% of container width
@@ -51,12 +52,22 @@ class MultiStates {
             .projection(vis.projection);
 
         // Create color scales
-        vis.priceColorScale = d3.scaleSequential(d3.interpolateGreens)
+        vis.priceColorScale = d3.scaleSequential(d3.interpolateOranges)
             .domain([0, 3]);
 
         vis.volumeColorScale = d3.scaleSequential(d3.interpolateGreens)
             .domain([0, 1000000]);
 
+        // Add transition overlay
+        vis.transitionOverlay = vis.svg.append("rect")
+            .attr("class", "transition-overlay")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", vis.width)
+            .attr("height", vis.height)
+            .attr("fill", "#fff")
+            .attr("opacity", 0)
+            .style("pointer-events", "none");
 
         // Add legend group
         vis.legendGroup = vis.svg.append("g")
@@ -143,20 +154,23 @@ class MultiStates {
         buttonGroup.selectAll(".metric-button")
             .on("click", function() {
                 const isPrice = d3.select(this).classed("price-button");
+                const oldMetric = vis.selectedMetric;
                 vis.selectedMetric = isPrice ? 'price' : 'volume';
 
                 // Update button styles
                 buttonGroup.selectAll(".metric-button")
-                    .style("fill", d => d3.select(d).classed(vis.selectedMetric + "-button") ? "#4CAF50" : "#f0f0f0");
+                    .style("fill", function() {
+                        return d3.select(this).classed(vis.selectedMetric + "-button") ? "#4CAF50" : "#f0f0f0";
+                    });
 
                 buttonGroup.selectAll("text")
                     .style("fill", function() {
-                        const isMetricButton = d3.select(this.previousSibling)
-                            .classed(vis.selectedMetric + "-button");
-                        return isMetricButton ? "white" : "black";
+                        const buttonType = d3.select(this.previousSibling).classed("price-button") ? "price" : "volume";
+                        return buttonType === vis.selectedMetric ? "white" : "black";
                     });
 
-                vis.updateVis();
+                // Perform transition
+                vis.transitionMetric(oldMetric, vis.selectedMetric);
             });
 
         // Initialize tooltip
@@ -248,6 +262,97 @@ class MultiStates {
             vis.stateBorders = topojson.mesh(us, us.objects.states, (a, b) => a !== b);
             vis.wrangleData();
         });
+    }
+
+    transitionMetric(oldMetric, newMetric) {
+        let vis = this;
+
+        if (oldMetric === newMetric) return;
+
+        const minPrice = d3.min(Object.values(vis.regionSummaries), d => d.avgPrice);
+        const minVolume = d3.min(Object.values(vis.regionSummaries), d => d.totalVolume);
+        const maxPrice = d3.max(Object.values(vis.regionSummaries), d => d.avgPrice);
+        const maxVolume = d3.max(Object.values(vis.regionSummaries), d => d.totalVolume);
+        vis.priceColorScale.domain([minPrice, maxPrice]);
+        vis.volumeColorScale.domain([minVolume, maxVolume]);
+
+        // Update legend during transition
+        vis.updateLegend(newMetric);
+
+        // Transition overlay effect
+        vis.transitionOverlay
+            .raise() // Bring overlay to front
+            .transition()
+            .duration(400)
+            .attr("opacity", 1)
+            .on("end", () => {
+                // Update state colors
+                vis.svg.selectAll(".state")
+                    .attr("fill", d => {
+                        const stateName = d.properties.name;
+                        const region = vis.stateRegionMap[stateName];
+                        const regionData = vis.regionSummaries[region];
+
+                        if (vis.selectedRegion && region === vis.selectedRegion) {
+                            return "#ff0000";
+                        }
+
+                        if (!region || !regionData) return "#ccc";
+
+                        return newMetric === 'price'
+                            ? vis.priceColorScale(regionData.avgPrice)
+                            : vis.volumeColorScale(regionData.totalVolume);
+                    });
+
+                // Second transition: Uncover
+                vis.transitionOverlay
+                    .transition()
+                    .duration(400)
+                    .attr("opacity", 0);
+            });
+
+    }
+
+    updateLegend(metric) {
+        let vis = this;
+        const scale = metric === 'price' ? vis.priceColorScale : vis.volumeColorScale;
+        const title = metric === 'price' ? 'Average Price ($)' : 'Total Volume';
+        const domain = scale.domain();
+
+        // Update gradient stops with transition
+        const gradientStops = d3.range(0, 1.1, 0.1);
+
+        d3.select("#legend-gradient").selectAll("stop")
+            .data(gradientStops)
+            .transition()
+            .duration(800)
+            .attr("stop-color", d => scale(domain[0] + (domain[1] - domain[0]) * d));
+
+        // Update legend title with transition
+        vis.legendTitle
+            .transition()
+            .duration(800)
+            .text(title);
+
+        // Update legend axis with transition
+        const legendScale = d3.scaleLinear()
+            .domain(domain)
+            .range([0, 200]);
+
+        const legendAxis = d3.axisBottom(legendScale)
+            .tickValues([domain[0] || 0, domain[1]])
+            .tickFormat(d => {
+                if (metric === 'price') {
+                    return `$${d.toFixed(2)}`;
+                } else {
+                    return d3.format(".2~s")(d);
+                }
+            });
+
+        vis.legendAxis
+            .transition()
+            .duration(800)
+            .call(legendAxis);
     }
 
     updateTable() {
@@ -363,7 +468,18 @@ class MultiStates {
         let currentRegion = null;
         let tooltipFixed = false;
 
+        const minPrice = d3.min(Object.values(vis.regionSummaries), d => d.avgPrice);
+        const minVolume = d3.min(Object.values(vis.regionSummaries), d => d.totalVolume);
+
+        const maxPrice = d3.max(Object.values(vis.regionSummaries), d => d.avgPrice);
+        const maxVolume = d3.max(Object.values(vis.regionSummaries), d => d.totalVolume);
+
+        vis.priceColorScale.domain([minPrice, maxPrice]);
+        vis.volumeColorScale.domain([minVolume, maxVolume]);
+
+        // Update states with current metric
         const scale = vis.selectedMetric === 'price' ? vis.priceColorScale : vis.volumeColorScale;
+
         const title = vis.selectedMetric === 'price' ? 'Average Price ($)' : 'Total Volume';
 
         // Update legend gradient
@@ -385,10 +501,15 @@ class MultiStates {
             .range([0, 200]);
 
         const legendAxis = d3.axisBottom(legendScale)
-            .ticks(5)
-            .tickFormat(d => vis.selectedMetric === 'price'
-                ? `$${d.toFixed(2)}`
-                : d3.format(".0s")(d));
+            .tickValues([domain[0], domain[1]]) // Show only min (or 1 if 0) and max values
+            .tickFormat(d => {
+                if (vis.selectedMetric === 'price') {
+                    return `$${d.toFixed(2)}`;
+                } else {
+                    // For volume, use compact notation (e.g., 1M, 2.5M)
+                    return d3.format(".2~s")(d);
+                }
+            });
 
         vis.legendAxis.call(legendAxis);
 
@@ -408,6 +529,7 @@ class MultiStates {
 
                 if (vis.selectedRegion && region === vis.selectedRegion) {
                     return "#ff0000";
+
                 }
 
                 if (!region || !regionData) return "#ccc";
@@ -424,6 +546,8 @@ class MultiStates {
             .on("click", function (event, d) {
                 const stateName = d.properties.name;
                 const region = vis.stateRegionMap[stateName];
+                const regionData = vis.regionSummaries[region];
+                console.log(regionData)
                 if (region && vis.regionSummaries[region]) {
                     if (vis.selectedRegion === region) {
                         // If clicking the same region again, deselect it
@@ -498,6 +622,8 @@ class MultiStates {
                 }
             });
 
+        vis.updateLegend(vis.selectedMetric);
+
         // Update state borders
         vis.svg.selectAll(".state-borders")
             .data([vis.stateBorders])
@@ -507,13 +633,6 @@ class MultiStates {
             .attr("fill", "none")
             .attr("stroke", "#fff")
             .attr("stroke-width", 0.5);
-
-        // Update color scales
-        const maxPrice = d3.max(Object.values(vis.regionSummaries), d => d.avgPrice);
-        const maxVolume = d3.max(Object.values(vis.regionSummaries), d => d.totalVolume);
-
-        vis.priceColorScale.domain([0, maxPrice]);
-        vis.volumeColorScale.domain([0, maxVolume]);
 
         // If there's a selected region, make sure it's highlighted
         if (vis.selectedRegion) {
