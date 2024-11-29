@@ -14,7 +14,7 @@ class MultiStates {
 
         // Set up chart dimensions
         const container = d3.select(vis.parentElement).node().getBoundingClientRect();
-        vis.margin = { top: 60, right: 300, bottom: 60, left: 80 }; // Increased right margin for table
+        vis.margin = { top: 60, right: container.width * 0.4, bottom: 60, left: 80 }; // Set right margin to 40% of container width
         vis.width = container.width - vis.margin.left - vis.margin.right;
         vis.height = container.height - vis.margin.top - vis.margin.bottom;
 
@@ -28,14 +28,19 @@ class MultiStates {
             .attr("transform", `translate(${vis.margin.left},${vis.margin.top})`);
 
         // Add title using custom font
-        vis.svg.append("text")
-            .attr("class", "vis-title")
-            .attr("x", vis.width / 2)
-            .attr("y", -30)
-            .attr("text-anchor", "middle")
+        const titleContainer = d3.select(vis.parentElement)
+            .append("div")
+            .style("width", "100%")
+            .style("position", "absolute")
+            .style("top", "10px")
+            .style("text-align", "center");
+
+        // Add main visualization title
+        titleContainer.append("h2")
             .style("font-family", "RockSlayers")
             .style("font-size", "24px")
-            .text("Avocado Price Map");
+            .style("margin", "0")
+            .text("Avocado Price Analysis");
 
         // Initialize map projection
         vis.projection = d3.geoAlbersUsa()
@@ -51,6 +56,108 @@ class MultiStates {
 
         vis.volumeColorScale = d3.scaleSequential(d3.interpolateGreens)
             .domain([0, 1000000]);
+
+
+        // Add legend group
+        vis.legendGroup = vis.svg.append("g")
+            .attr("class", "legend")
+            .attr("transform", `translate(20, ${vis.height})`);
+
+        // Add legend title
+        vis.legendTitle = vis.legendGroup.append("text")
+            .attr("class", "legend-title")
+            .attr("x", 0)
+            .attr("y", -10)
+            .style("font-family", "RockSlayers")
+            .style("font-size", "14px");
+
+        // Create gradient for legend
+        const defs = vis.svg.append("defs");
+        const linearGradient = defs.append("linearGradient")
+            .attr("id", "legend-gradient")
+            .attr("x1", "0%")
+            .attr("x2", "100%")
+            .attr("y1", "0%")
+            .attr("y2", "0%");
+
+        // Create legend rectangle with gradient
+        vis.legendGroup.append("rect")
+            .attr("width", 200)
+            .attr("height", 20)
+            .style("fill", "url(#legend-gradient)");
+
+        // Add legend axis group
+        vis.legendAxis = vis.legendGroup.append("g")
+            .attr("class", "legend-axis")
+            .attr("transform", "translate(0, 20)");
+
+
+        // Add metric toggle buttons
+        const buttonGroup = vis.svg.append("g")
+            .attr("class", "button-group")
+            .attr("transform", `translate(${vis.width/2}, ${vis.height})`);
+
+        // Price button
+        buttonGroup.append("rect")
+            .attr("class", "metric-button price-button")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", 80)
+            .attr("height", 25)
+            .attr("rx", 5)
+            .style("fill", vis.selectedMetric === 'price' ? "#4CAF50" : "#f0f0f0")
+            .style("cursor", "pointer");
+
+        buttonGroup.append("text")
+            .attr("x", 40)
+            .attr("y", 16)
+            .attr("text-anchor", "middle")
+            .style("font-family", "Patrick Hand")
+            .style("font-size", "12px")
+            .style("fill", vis.selectedMetric === 'price' ? "white" : "black")
+            .style("pointer-events", "none")
+            .text("Price");
+
+        // Volume button
+        buttonGroup.append("rect")
+            .attr("class", "metric-button volume-button")
+            .attr("x", 90)
+            .attr("y", 0)
+            .attr("width", 80)
+            .attr("height", 25)
+            .attr("rx", 5)
+            .style("fill", vis.selectedMetric === 'volume' ? "#4CAF50" : "#f0f0f0")
+            .style("cursor", "pointer");
+
+        buttonGroup.append("text")
+            .attr("x", 130)
+            .attr("y", 16)
+            .attr("text-anchor", "middle")
+            .style("font-family", "Patrick Hand")
+            .style("font-size", "12px")
+            .style("fill", vis.selectedMetric === 'volume' ? "white" : "black")
+            .style("pointer-events", "none")
+            .text("Volume");
+
+        // Add click events for metric buttons
+        buttonGroup.selectAll(".metric-button")
+            .on("click", function() {
+                const isPrice = d3.select(this).classed("price-button");
+                vis.selectedMetric = isPrice ? 'price' : 'volume';
+
+                // Update button styles
+                buttonGroup.selectAll(".metric-button")
+                    .style("fill", d => d3.select(d).classed(vis.selectedMetric + "-button") ? "#4CAF50" : "#f0f0f0");
+
+                buttonGroup.selectAll("text")
+                    .style("fill", function() {
+                        const isMetricButton = d3.select(this.previousSibling)
+                            .classed(vis.selectedMetric + "-button");
+                        return isMetricButton ? "white" : "black";
+                    });
+
+                vis.updateVis();
+            });
 
         // Initialize tooltip
         vis.tooltip = d3.select("body").append("div")
@@ -70,7 +177,7 @@ class MultiStates {
             .style("position", "absolute")
             .style("top", `${vis.margin.top}px`)
             .style("right", "20px")
-            .style("width", "280px")
+            .style("width", `${container.width * 0.38}px`) // Set width to slightly less than 40% to account for padding
             .style("height", `${vis.height}px`)
             .style("overflow-y", "auto")
             .style("background", "white")
@@ -249,41 +356,43 @@ class MultiStates {
             .style("fill-opacity", 0.1);  // Semi-transparent
     }
 
-    highlightRegion(region) {
-        let vis = this;
-
-        // Remove existing highlights
-        vis.svg.selectAll(".state")
-            .attr("stroke", null)
-            .attr("stroke-width", null)
-            .attr("fill", d => {
-                const stateName = d.properties.name;
-                const stateRegion = vis.stateRegionMap[stateName];
-                const regionData = vis.regionSummaries[stateRegion];
-
-                if (!stateRegion || !regionData) return "#ccc";
-
-                return vis.selectedMetric === 'price'
-                    ? vis.priceColorScale(regionData.avgPrice)
-                    : vis.volumeColorScale(regionData.totalVolume);
-            })
-            .style("fill-opacity", 1);
-
-        // Add highlight to selected region
-        vis.svg.selectAll(".state")
-            .filter(d => vis.stateRegionMap[d.properties.name] === region)
-            .attr("stroke", "#000")
-            .attr("stroke-width", 2)
-            .attr("fill", "#ff0000")  // Red fill color
-            .style("fill-opacity", 0.1);  // Semi-transparent
-    }
-
     updateVis() {
         let vis = this;
 
         // Track current highlighted region
         let currentRegion = null;
         let tooltipFixed = false;
+
+        const scale = vis.selectedMetric === 'price' ? vis.priceColorScale : vis.volumeColorScale;
+        const title = vis.selectedMetric === 'price' ? 'Average Price ($)' : 'Total Volume';
+
+        // Update legend gradient
+        const gradientStops = d3.range(0, 1.1, 0.1);
+        const domain = scale.domain();
+
+        d3.select("#legend-gradient").selectAll("stop")
+            .data(gradientStops)
+            .join("stop")
+            .attr("offset", d => d * 100 + "%")
+            .attr("stop-color", d => scale(domain[0] + (domain[1] - domain[0]) * d));
+
+        // Update legend title
+        vis.legendTitle.text(title);
+
+        // Update legend axis
+        const legendScale = d3.scaleLinear()
+            .domain(domain)
+            .range([0, 200]);
+
+        const legendAxis = d3.axisBottom(legendScale)
+            .ticks(5)
+            .tickFormat(d => vis.selectedMetric === 'price'
+                ? `$${d.toFixed(2)}`
+                : d3.format(".0s")(d));
+
+        vis.legendAxis.call(legendAxis);
+
+
 
         const states = vis.svg.selectAll(".state")
             .data(vis.usStates);
@@ -297,7 +406,6 @@ class MultiStates {
                 const region = vis.stateRegionMap[stateName];
                 const regionData = vis.regionSummaries[region];
 
-                // If this state is in the selected region, use highlight color
                 if (vis.selectedRegion && region === vis.selectedRegion) {
                     return "#ff0000";
                 }
