@@ -274,3 +274,39 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(section);
     });
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    const sections = document.querySelectorAll('.section');
+    const dots = document.querySelectorAll('.scroll-dot');
+
+    // Add click handlers to dots
+    dots.forEach(dot => {
+        dot.addEventListener('click', function() {
+            const targetSection = document.getElementById(this.dataset.section);
+            targetSection.scrollIntoView({ behavior: 'smooth' });
+        });
+    });
+
+    // Track scroll position and update dots
+    window.addEventListener('scroll', function() {
+        const currentPos = window.scrollY;
+
+        sections.forEach((section, index) => {
+            const rect = section.getBoundingClientRect();
+            const dot = dots[index];
+
+            // If section is above the viewport, mark as visited
+            if (rect.top + rect.height <= 0) {
+                dot.classList.add('visited');
+            } else {
+                dot.classList.remove('visited');
+            }
+
+            // Highlight current section
+            if (rect.top <= window.innerHeight/2 && rect.bottom >= window.innerHeight/2) {
+                dots.forEach(d => d.classList.remove('active'));
+                dot.classList.add('active');
+            }
+        });
+    });
+});

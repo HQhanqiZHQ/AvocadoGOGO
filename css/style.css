@@ -38,37 +38,52 @@
     border-radius: 4px;
     overflow: hidden;
 }
-
-/* Scroll navigation */
+/* Keep the existing scroll navigation container styles */
 .scroll-nav {
     position: fixed;
-    right: 20px;
+    right: 5px;
     top: 50%;
     transform: translateY(-50%);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 15px;
+    gap: 2px;
     z-index: 1000;
 }
 
+/* Update the scroll-dot styles for the new icon */
 .scroll-dot {
-    width: 12px;
-    height: 12px;
-    border: 2px solid #4a7337;
-    background: transparent;
-    border-radius: 50%;
+    width: 20px;  /* Adjusted for icon size */
+    height: 20px; /* Adjusted for icon size */
+    border: none;
+    background-color: transparent;
+    background-image: url('/img/icons/icon8.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
     cursor: pointer;
     transition: all 0.3s ease;
     padding: 0;
-    margin: 5px 0;
+    margin: 2px 0;
 }
 
+/* Add hover rotation effect */
+.scroll-dot:hover {
+    transform: rotate(-45deg) scale(1.1);
+}
+
+/* Update active state to use the completed icon */
 .scroll-dot.active {
-    background: #4a7337;
-    transform: scale(1.2);
+    background-image: url('/img/icons/icon7.png');
+    transform: scale(1.1);
 }
 
+/* Add visited state */
+.scroll-dot.visited {
+    background-image: url('/img/icons/icon7.png');
+}
+
+/* Keep existing scroll button styles */
 .scroll-btn {
     width: 40px;
     height: 40px;
@@ -346,7 +361,15 @@
 
 /* Basic noUiSlider styling */
 .noUi-target {
-    background: rgba(198, 232, 202, 0.63) !important; /* Light green background */
+    background: linear-gradient(
+            to right,
+            #a7ffab 0%,           /* Green from 0-33.33% */
+            #a7ffab 33.33%,       /* Green ends at 33.33% */
+            #8ec4ff 33.33%,       /* Blue starts at 33.33% */
+            #2196F3 66.66%,       /* Blue ends at 66.66% */
+            #ff89e3 66.66%,       /* Pink starts at 66.66% */
+            #E91E63 100%          /* Pink ends at 100% */
+    ) !important;
     border: none !important;
     box-shadow: none !important;
     height: 8px;
@@ -377,7 +400,7 @@
 }
 /* Connect (selected range) styling */
 .noUi-connect {
-    background: #8bc34a !important; /* Lighter green for the track */
+    background: rgba(189, 255, 89, 0.63) !important; /* Lighter green for the track */
 }
 
 
