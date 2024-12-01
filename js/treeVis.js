@@ -14,7 +14,7 @@ class TreeVis {
         let vis = this;
 
         const container = d3.select(vis.parentElement).node().getBoundingClientRect();
-        vis.margin = { top: 60, right: 100, bottom: 100, left: 80 };
+        vis.margin = { top: 0, right: 100, bottom: 100, left: 80 };
         vis.width = container.width - vis.margin.left - vis.margin.right;
         vis.height = container.height - vis.margin.top - vis.margin.bottom;
 
@@ -75,7 +75,7 @@ class TreeVis {
 
         vis.barChartGroup = vis.svg.append("g")
             .attr("class", "bar-chart-group")
-            .attr("transform", `translate(20,${vis.height * 0.8})`);
+            .attr("transform", `translate(20,${vis.height * 0.9})`);
 
         // Create tooltip
         vis.tooltip = d3.select("body").append("div")
