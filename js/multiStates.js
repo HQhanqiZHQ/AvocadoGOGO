@@ -1,8 +1,8 @@
 class MultiStates {
-    constructor(parentElement, regionData, stateData) {
+    constructor(parentElement, regionData, cityData) {
         this.parentElement = parentElement;
         this.data = regionData;
-        this.stateData = stateData;
+        this.cityData = cityData;
         this.startMonth = 0;
         this.endMonth = 3;
         this.selectedRegion = null;
@@ -12,7 +12,7 @@ class MultiStates {
 
     initVis() {
         let vis = this;
-        console.log(this.stateData)
+        console.log(this.cityData)
         // Set up chart dimensions
         const container = d3.select(vis.parentElement).node().getBoundingClientRect();
         vis.margin = { top: 60, right: container.width * 0.4, bottom: 60, left: 80 }; // Set right margin to 40% of container width
@@ -41,7 +41,7 @@ class MultiStates {
             .style("font-family", "RockSlayers")
             .style("font-size", "24px")
             .style("margin", "0")
-            .text("Avocado Price Analysis");
+            .text("Avocado Volume & Price Analysis");
 
         // Initialize map projection
         vis.projection = d3.geoAlbersUsa()
@@ -235,7 +235,7 @@ class MultiStates {
             'Plains': ['Minnesota', 'Iowa', 'Missouri', 'Kansas', 'Nebraska', 'South Dakota', 'North Dakota'],
             'SouthCentral': ['Texas', 'Oklahoma', 'Arkansas'],
             'Southeast': ['North Carolina', 'South Carolina', 'Georgia', 'Florida'],
-            'West': ['California', 'Nevada', 'Oregon', 'Washington', 'Idaho', 'Montana', 'Wyoming', 'Utah', 'Colorado', 'Arizona'],
+            'West': ['Nevada', 'Oregon', 'Washington', 'Idaho', 'Montana', 'Wyoming', 'Utah', 'Colorado', 'Arizona'],
             'WestTexNewMexico': ['New Mexico', 'Texas'],
             'California': ['California']
         };
@@ -293,9 +293,9 @@ class MultiStates {
                         const region = vis.stateRegionMap[stateName];
                         const regionData = vis.regionSummaries[region];
 
-                        if (vis.selectedRegion && region === vis.selectedRegion) {
-                            return "#ff0000";
-                        }
+                        // if (vis.selectedRegion && region === vis.selectedRegion) {
+                            // return "#ff0000";
+                        // }
 
                         if (!region || !regionData) return "#ccc";
 
@@ -365,71 +365,162 @@ class MultiStates {
         const table = vis.tableContainer.append("table")
             .style("width", "100%")
             .style("border-collapse", "collapse");
-
-        // Add table headers
-        const headers = ["Region", "Avg Price", "Volume", "Small Bags", "Large Bags", "XL Bags"];
-        table.append("thead")
-            .append("tr")
-            .selectAll("th")
-            .data(headers)
-            .enter()
-            .append("th")
-            .style("padding", "5px")
-            .style("border-bottom", "2px solid #ddd")
-            .style("text-align", "left")
-            .style("font-size", "12px")
-            .text(d => d);
-
-        // Filter and sort data
-        let tableData;
         if (vis.selectedRegion) {
-            tableData = [vis.regionSummaries[vis.selectedRegion]];
+            // Show state-level data for selected region
+            const headers = ["State", "Avg Price", "Volume", "Small Bags", "Large Bags", "XL Bags"];
+
+            // Add table headers
+            table.append("thead")
+                .append("tr")
+                .selectAll("th")
+                .data(headers)
+                .enter()
+                .append("th")
+                .style("padding", "5px")
+                .style("border-bottom", "2px solid #ddd")
+                .style("text-align", "left")
+                .style("font-size", "12px")
+                .text(d => d);
+
+            // Get states in the selected region
+            const statesInRegion = vis.regionStatesMap[vis.selectedRegion];
+            // Calculate state-level summaries
+            const cityData = statesInRegion.map(state => {
+                const stateAbbr = mapStateToAbbr(state);
+                const stateRecords = vis.cityData[stateAbbr]?.filter(d => {
+                    const date = new Date(d.date);
+                    const monthIndex = (date.getFullYear() - 2015) * 12 + date.getMonth();
+                    return monthIndex >= vis.startMonth && monthIndex <= vis.endMonth;
+                }) || [];
+
+                if (!stateRecords.length) return null;
+
+                // Group records by region
+                const groupedByRegion = d3.group(stateRecords, d => d.region);
+
+                // Convert grouped data to array of summaries
+                return Array.from(groupedByRegion, ([region, records]) => ({
+                    state: region,
+                    avgPrice: d3.mean(records, d => d.averagePrice) || '',
+                    totalVolume: d3.sum(records, d => d.totalVolume) || '',
+                    smallBags: d3.sum(records, d => d.smallBags) || '',
+                    largeBags: d3.sum(records, d => d.largeBags) || '',
+                    xLargeBags: d3.sum(records, d => d.xLargeBags) || 'Invalid'
+                }));
+            })
+                .filter(d => d !== null)
+                .flat() // Flatten the array of arrays
+                .sort((a, b) => b.totalVolume - a.totalVolume);
+            // Show reset button
             d3.select(".reset-button").style("display", "block");
+
+            // Add rows for state data
+            const rows = table.append("tbody")
+                .selectAll("tr")
+                .data(cityData)
+                .enter()
+                .append("tr")
+                .style("border-bottom", "1px solid #ddd");
+
+            // Add cells
+            rows.selectAll("td")
+                .data(d => [
+                    d.state,
+                    `$${d.avgPrice.toFixed(2)}`,
+                    d3.format(",")(Math.round(d.totalVolume)),
+                    d3.format(",")(Math.round(d.smallBags)),
+                    d3.format(",")(Math.round(d.largeBags)),
+                    d3.format(",")(Math.round(d.xLargeBags))||''
+                ])
+                .enter()
+                .append("td")
+                .style("padding", "5px")
+                .style("font-size", "12px")
+                .style("text-align", (d, i) => i === 0 ? "left" : "right")
+                .text(d => d);
+
+            // Add region total row
+            const totalRow = table.append("tbody")
+                .append("tr")
+                .style("border-top", "2px solid #ddd")
+                .style("font-weight", "bold");
+
+            const regionData = vis.regionSummaries[vis.selectedRegion];
+            totalRow.selectAll("td")
+                .data([
+                    "Region Total",
+                    `$${regionData.avgPrice.toFixed(2)}`,
+                    d3.format(",")(Math.round(regionData.totalVolume)),
+                    d3.format(",")(Math.round(regionData.smallBags)),
+                    d3.format(",")(Math.round(regionData.largeBags)),
+                    d3.format(",")(Math.round(regionData.xLargeBags))||''
+                ])
+                .enter()
+                .append("td")
+                .style("padding", "5px")
+                .style("font-size", "12px")
+                .style("text-align", (d, i) => i === 0 ? "left" : "right")
+                .text(d => d);
+
         } else {
-            tableData = Object.entries(vis.regionSummaries)
+            // Show region-level data (keep existing region summary code)
+            const headers = ["Region", "Avg Price", "Volume", "Small Bags", "Large Bags", "XL Bags"];
+
+            table.append("thead")
+                .append("tr")
+                .selectAll("th")
+                .data(headers)
+                .enter()
+                .append("th")
+                .style("padding", "5px")
+                .style("border-bottom", "2px solid #ddd")
+                .style("text-align", "left")
+                .style("font-size", "12px")
+                .text(d => d);
+
+            // Filter and sort data
+            let tableData = Object.entries(vis.regionSummaries)
                 .map(([region, data]) => ({
                     region,
                     ...data
                 }))
                 .sort((a, b) => b.totalVolume - a.totalVolume);
-            d3.select(".reset-button").style("display", "none");
+
+            const rows = table.append("tbody")
+                .selectAll("tr")
+                .data(tableData)
+                .enter()
+                .append("tr")
+                .style("border-bottom", "1px solid #ddd")
+                .style("cursor", "pointer")
+                .on("mouseover", function() {
+                    d3.select(this).style("background", "#f0f0f0");
+                })
+                .on("mouseout", function() {
+                    d3.select(this).style("background", null);
+                })
+                .on("click", function(event, d) {
+                    vis.selectedRegion = d.region;
+                    vis.updateTable();
+                    vis.highlightRegion(d.region);
+                });
+
+            rows.selectAll("td")
+                .data(d => [
+                    d.region,
+                    `$${d.avgPrice.toFixed(2)}`,
+                    d3.format(",")(Math.round(d.totalVolume)),
+                    d3.format(",")(Math.round(d.smallBags)),
+                    d3.format(",")(Math.round(d.largeBags)),
+                    d3.format(",")(Math.round(d.xLargeBags))||''
+                ])
+                .enter()
+                .append("td")
+                .style("padding", "5px")
+                .style("font-size", "12px")
+                .style("text-align", (d, i) => i === 0 ? "left" : "right")
+                .text(d => d);
         }
-
-        // Add table rows
-        const rows = table.append("tbody")
-            .selectAll("tr")
-            .data(tableData)
-            .enter()
-            .append("tr")
-            .style("border-bottom", "1px solid #ddd")
-            .style("cursor", "pointer")
-            .on("mouseover", function () {
-                d3.select(this).style("background", "#f0f0f0");
-            })
-            .on("mouseout", function () {
-                d3.select(this).style("background", null);
-            })
-            .on("click", function (event, d) {
-                vis.selectedRegion = d.region;
-                vis.updateTable();
-                vis.highlightRegion(d.region);
-            });
-
-        // Add cells
-        rows.selectAll("td")
-            .data(d => [
-                d.region,
-                `$${d.avgPrice.toFixed(2)}`,
-                d3.format(",")(Math.round(d.totalVolume)),
-                d3.format(",")(Math.round(d.smallBags)),
-                d3.format(",")(Math.round(d.largeBags)),
-                d3.format(",")(Math.round(d.xLargeBags))
-            ])
-            .enter()
-            .append("td")
-            .style("padding", "5px")
-            .style("font-size", "12px")
-            .text(d => d);
     }
 
     highlightRegion(region) {
@@ -457,8 +548,9 @@ class MultiStates {
             .filter(d => vis.stateRegionMap[d.properties.name] === region)
             .attr("stroke", "#000")
             .attr("stroke-width", 2)
-            .attr("fill", "#ff0000")  // Red fill color
-            .style("fill-opacity", 0.1);  // Semi-transparent
+            // Deep blue with 0.2 opacity
+            .attr("fill", vis.selectedMetric === 'price' ? '#ff89e3' : '#8ec4ff')
+            .style("fill-opacity", 0.2)// Semi-transparent
     }
 
     updateVis() {
@@ -527,10 +619,9 @@ class MultiStates {
                 const region = vis.stateRegionMap[stateName];
                 const regionData = vis.regionSummaries[region];
 
-                if (vis.selectedRegion && region === vis.selectedRegion) {
-                    return "#ff0000";
-
-                }
+                // if (vis.selectedRegion && region === vis.selectedRegion) {
+                //     return "#ff0000";
+                // }
 
                 if (!region || !regionData) return "#ccc";
 
@@ -547,7 +638,7 @@ class MultiStates {
                 const stateName = d.properties.name;
                 const region = vis.stateRegionMap[stateName];
                 const regionData = vis.regionSummaries[region];
-                console.log(regionData)
+
                 if (region && vis.regionSummaries[region]) {
                     if (vis.selectedRegion === region) {
                         // If clicking the same region again, deselect it
