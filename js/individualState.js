@@ -3,25 +3,21 @@ class IndividualState {
         this.parentElement = parentElement;
         this.data = data;
         this.selectedYear = null;
-        this.sortMetric = "avgPrice";
+        this.sortMetric = "avgVolume"; // Default sort by volume
         this.initVis();
     }
 
     initVis() {
         let vis = this;
 
-        // Style container
         vis.container = d3.select(vis.parentElement)
             .append("div")
             .attr("class", "state-cloud-container")
-            // .style("padding", "15px")
             .style("position", "relative")
             .style("background-color", "#ffffff")
             .style("border-radius", "8px")
-            .style("box-shadow", "0 2px 4px rgba(0,0,0,0.1)")
-            // .style("margin-bottom", "3px");
+            .style("box-shadow", "0 2px 4px rgba(0,0,0,0.1)");
 
-        // Header styling
         vis.container.append("h3")
             .style("text-align", "center")
             .style("font-family", "RockSlayers")
@@ -33,7 +29,6 @@ class IndividualState {
         this.addYearSelector();
         this.addMetricToggle();
 
-        // Tooltip styling
         vis.tooltip = d3.select("body").append("div")
             .attr("class", "state-tooltip")
             .style("position", "absolute")
@@ -48,7 +43,6 @@ class IndividualState {
             .style("z-index", "1000")
             .style("box-shadow", "0 2px 4px rgba(0,0,0,0.1)");
 
-        // Cloud container styling
         vis.cloudContainer = vis.container.append("div")
             .attr("class", "word-cloud")
             .style("width", "800px")
@@ -60,7 +54,6 @@ class IndividualState {
             .style("border-radius", "8px")
             .style("border", "1px solid #eee");
 
-        // SVG styling
         vis.svg = vis.cloudContainer.append("svg")
             .attr("width", "800")
             .attr("height", "600")
@@ -76,13 +69,11 @@ class IndividualState {
 
         const selectorContainer = vis.container.append("div")
             .style("text-align", "center")
-            .style("margin", "20px 0")
-            .style("padding", "10px");
+            .style("margin", "20px 0");
 
         selectorContainer.append("label")
             .style("font-family", "Patrick Hand")
             .style("margin-right", "15px")
-            .style("font-size", "16px")
             .text("Select Year: ");
 
         selectorContainer.append("select")
@@ -91,7 +82,6 @@ class IndividualState {
             .style("border-radius", "4px")
             .style("border", "1px solid #4a7337")
             .style("cursor", "pointer")
-            .style("outline", "none")
             .on("change", function() {
                 vis.selectedYear = +this.value;
                 vis.wrangleData();
@@ -108,35 +98,7 @@ class IndividualState {
 
     addMetricToggle() {
         let vis = this;
-        vis.container.append("div")
-            .style("text-align", "center")
-            .style("margin", "10px 0")
-            .append("button")
-            .style("padding", "8px 15px")
-            .style("font-family", "Patrick Hand")
-            .style("font-size", "14px")
-            .style("cursor", "pointer")
-            .style("background", "#4a7337")
-            .style("color", "white")
-            .style("border", "none")
-            .style("border-radius", "5px")
-            .style("transition", "background-color 0.3s")
-            .text("Toggle Size by Price/Volume")
-            .on("mouseover", function() {
-                d3.select(this).style("background", "#5a8347");
-            })
-            .on("mouseout", function() {
-                d3.select(this).style("background", "#4a7337");
-            })
-            .on("click", () => {
-                vis.sortMetric = vis.sortMetric === "avgPrice" ? "avgVolume" : "avgPrice";
-                vis.wrangleData();
-            });
-    }
-
-    addMetricToggle() {
-        let vis = this;
-        vis.container.append("div")
+        vis.metricButton = vis.container.append("div")
             .style("text-align", "center")
             .style("margin", "10px 0")
             .append("button")
@@ -147,16 +109,16 @@ class IndividualState {
             .style("color", "white")
             .style("border", "none")
             .style("border-radius", "5px")
-            .text("Toggle Size by Price/Volume")
+            .text(`Currently showing: Size by ${vis.sortMetric === "avgPrice" ? "Price" : "Volume"}`)
             .on("click", () => {
                 vis.sortMetric = vis.sortMetric === "avgPrice" ? "avgVolume" : "avgPrice";
+                vis.metricButton.text(`Currently showing: Size by ${vis.sortMetric === "avgPrice" ? "Price" : "Volume"}`);
                 vis.wrangleData();
             });
     }
 
     wrangleData() {
         let vis = this;
-
         vis.wordData = Object.entries(vis.data)
             .filter(([state, _]) => state !== 'ALL')
             .map(([state, stateData]) => {
@@ -169,14 +131,13 @@ class IndividualState {
             })
             .filter(d => d.avgPrice > 0);
 
-        const metric = vis.sortMetric === "avgPrice" ? "avgPrice" : "avgVolume";
-        const sizeScale = d3.scaleLog()
-            .domain([d3.min(vis.wordData, d => d[metric]),
-                d3.max(vis.wordData, d => d[metric])])
-            .range([20, 50]);
+        const volumeScale = d3.scaleLog()
+            .domain([d3.min(vis.wordData, d => d.avgVolume),
+                d3.max(vis.wordData, d => d.avgVolume)])
+            .range([20, 60]);
 
         vis.wordData.forEach(d => {
-            d.size = sizeScale(d[metric]);
+            d.size = volumeScale(d.avgVolume);
         });
 
         vis.updateVis();
@@ -199,9 +160,10 @@ class IndividualState {
 
         function draw(words) {
             const colorScale = d3.scaleSequential()
-                .domain(d3.extent(vis.wordData, d => d[vis.sortMetric]))
-                .interpolator(d3.interpolateGreens);
+                .domain(d3.extent(vis.wordData, d => d.avgPrice))
+                .interpolator(d3.interpolateRdBu);
 
+            // Draw main word cloud
             const group = vis.svg.append("g")
                 .attr("transform", "translate(400,250)")
                 .selectAll("text")
@@ -209,7 +171,7 @@ class IndividualState {
                 .enter()
                 .append("text")
                 .style("font-family", "Patrick Hand")
-                .style("fill", d => colorScale(d[vis.sortMetric]))
+                .style("fill", d => colorScale(d.avgPrice))
                 .style("cursor", "pointer")
                 .attr("text-anchor", "middle")
                 .attr("transform", d => `translate(${d.x},${d.y})rotate(${d.rotate})`)
@@ -231,8 +193,7 @@ class IndividualState {
                             <div style="font-family: Patrick Hand">
                                 <strong>${d.text}</strong><br/>
                                 Price: $${d.avgPrice.toFixed(2)}<br/>
-                                Volume: ${d3.format(",")(Math.round(d.avgVolume))}<br/>
-                                Rank: ${vis.wordData.indexOf(d) + 1}/${vis.wordData.length}
+                                Volume: ${d3.format(",")(Math.round(d.avgVolume))}
                             </div>
                         `);
                 })
@@ -246,6 +207,83 @@ class IndividualState {
                     vis.tooltip.style("opacity", 0);
                 });
 
+            // Add legend
+            const legend = vis.svg.append("g")
+                .attr("class", "legend")
+                .attr("transform", "translate(650, 50)");
+
+            // Color legend
+            legend.append("text")
+                .attr("x", 0)
+                .attr("y", -10)
+                .style("font-family", "Patrick Hand")
+                .text("Price Range:");
+
+            const colorLegend = legend.append("g");
+            const gradient = vis.svg.append("defs")
+                .append("linearGradient")
+                .attr("id", "color-gradient")
+                .attr("y1", "0%")
+                .attr("y2", "100%");
+
+            gradient.append("stop")
+                .attr("offset", "0%")
+                .attr("stop-color", d3.interpolateRdBu(1));
+            gradient.append("stop")
+                .attr("offset", "100%")
+                .attr("stop-color", d3.interpolateRdBu(0));
+
+            colorLegend.append("rect")
+                .attr("width", 20)
+                .attr("height", 100)
+                .style("fill", "url(#color-gradient)");
+
+            const priceExtent = d3.extent(vis.wordData, d => d.avgPrice);
+            colorLegend.append("text")
+                .attr("x", 25)
+                .attr("y", 10)
+                .style("font-family", "Patrick Hand")
+                .text(`High: $${priceExtent[1].toFixed(2)}`);
+
+            colorLegend.append("text")
+                .attr("x", 25)
+                .attr("y", 95)
+                .style("font-family", "Patrick Hand")
+                .text(`Low: $${priceExtent[0].toFixed(2)}`);
+
+            // Size legend
+            const volumeExtent = d3.extent(vis.wordData, d => d.avgVolume);
+            const sizeLegend = legend.append("g")
+                .attr("transform", "translate(0, 150)");
+
+            sizeLegend.append("text")
+                .attr("x", 0)
+                .attr("y", -10)
+                .style("font-family", "Patrick Hand")
+                .text("Volume Range:");
+
+            // Example sizes
+            [20, 40, 60].forEach((size, i) => {
+                const y = i * 40 + 20;
+                sizeLegend.append("text")
+                    .attr("x", 0)
+                    .attr("y", y)
+                    .style("font-family", "Patrick Hand")
+                    .style("font-size", size)
+                    .text("Aa");
+
+                sizeLegend.append("text")
+                    .attr("x", 50)
+                    .attr("y", y)
+                    .style("font-family", "Patrick Hand")
+                    .text(d3.format(".2s")(
+                        d3.scaleLinear()
+                            .domain([0, 2])
+                            .range([volumeExtent[0], volumeExtent[1]])(i)
+                    ));
+            });
+
+            // Animate words
             group.transition()
                 .delay((d, i) => i * 20)
                 .duration(1000)
@@ -253,4 +291,3 @@ class IndividualState {
         }
     }
 }
-
