@@ -108,6 +108,41 @@ class PriceVisualization {
             .style("z-index", 1000);
 
         this.updateVis();
+        this.initBottomTooltip();
+
+        // Add transparent overlay for mouse tracking
+        vis.overlay = vis.svg.append("rect")
+            .attr("class", "overlay")
+            .attr("width", vis.width)
+            .attr("height", vis.height)
+            .style("opacity", 0)
+            .on("mousemove", function(event) {
+                const mouseX = d3.pointer(event)[0];
+                const x0 = vis.x.invert(mouseX);
+                const bisect = d3.bisector(d => d.date).left;
+                const data = vis.processData();
+                const index = bisect(data, x0);
+                const d = data[index];
+
+                if (d) {
+                    vis.bottomTooltip
+                        .style("opacity", 1)
+                        .html(`
+                        <div style="text-align: center;">
+                            <strong>${d3.timeFormat("%B %Y")(d.date)}</strong><br/>
+                            ${vis.viewType === 'combined' ?
+                            `<strong>Average Price:</strong> $${d.combined.toFixed(2)}` :
+                            `<strong>Organic:</strong> $${d.organic.toFixed(2)} | 
+                                 <strong>Conventional:</strong> $${d.conventional.toFixed(2)}`
+                        }<br/>
+                            <strong>Total Volume:</strong> ${d3.format(",")(d.totalVolume)}
+                        </div>
+                    `);
+                }
+            })
+            .on("mouseout", function() {
+                vis.bottomTooltip.style("opacity", 0);
+            });
     }
 
     processData() {
@@ -146,7 +181,26 @@ class PriceVisualization {
 
         return extremes;
     }
+    initBottomTooltip() {
+        let vis = this;
 
+        // Create bottom tooltip container
+        vis.bottomTooltip = d3.select(vis.parentElement)
+            .append("div")
+            .attr("class", "bottom-tooltip")
+            .style("opacity", 0)
+            .style("position", "absolute")
+            .style("left", "50%")
+            .style("transform", "translateX(-50%)")
+            .style("bottom", "10px")
+            .style("background", "white")
+            .style("padding", "10px")
+            .style("border", "1px solid #ddd")
+            .style("border-radius", "5px")
+            .style("font-family", "Patrick Hand")
+            .style("pointer-events", "none")
+            .style("z-index", 1000);
+    }
     updateVis() {
         let vis = this;
         let processedData = vis.processData();
@@ -254,7 +308,7 @@ class PriceVisualization {
                     vis.tooltip.style("opacity", 0);
                 });
         }
-
+        vis.addYearDividers();
         // Update axes
         vis.xAxisG.call(vis.xAxis)
             .selectAll("text")
@@ -388,6 +442,47 @@ class PriceVisualization {
                     .curve(d3.curveMonotoneX)(points);
             });
     }
+    addYearDividers() {
+        let vis = this;
+
+        // Get unique years from data
+        let years = [...new Set(vis.data.map(d => d.date.getFullYear()))];
+
+        // Remove existing dividers
+        vis.svg.selectAll(".year-divider").remove();
+        vis.svg.selectAll(".year-label").remove();
+
+        // Add dividers and labels
+        years.forEach(year => {
+            let yearStart = new Date(year, 0, 1);
+
+            // Skip first divider to avoid overlapping with y-axis
+            if (year !== years[0]) {
+                // Add vertical line
+                vis.svg.append("line")
+                    .attr("class", "year-divider")
+                    .attr("x1", vis.x(yearStart))
+                    .attr("x2", vis.x(yearStart))
+                    .attr("y1", 0)
+                    .attr("y2", vis.height)
+                    .attr("stroke", "#4a7337")
+                    .attr("stroke-width", 1)
+                    .attr("stroke-dasharray", "4,4")
+                    .attr("opacity", 0.3);
+            }
+
+            // Add year label at bottom
+            vis.svg.append("text")
+                .attr("class", "year-label")
+                .attr("x", vis.x(yearStart))
+                .attr("y", vis.height + 40)
+                .attr("text-anchor", "middle")
+                .style("font-family", "Patrick Hand")
+                .style("font-size", "12px")
+                .style("fill", "#4a7337")
+                .text(year);
+        });
+    }
     updateLegend() {
         let vis = this;
         vis.svg.selectAll(".legend").remove();
@@ -456,6 +551,15 @@ const styles = `
     transition: all 0.2s;
     cursor: pointer;
     pointer-events: none;
+    }
+    .overlay {
+    cursor: pointer;
+    }
+
+    .bottom-tooltip {
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        transition: opacity 0.3s;
+        white-space: nowrap;
     }
 `;
 

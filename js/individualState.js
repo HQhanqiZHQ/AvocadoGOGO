@@ -108,29 +108,22 @@ class IndividualState {
         vis.tableData = Object.entries(vis.data).map(([state, stateData]) => {
             const yearData = stateData.filter(d => d.year === vis.selectedYear);
 
-            const avgPrice = d3.mean(yearData, d => d.averagePrice);
-            const avgVolume = d3.mean(yearData, d => d.totalVolume);
-
             return {
-                state: state,
-                avgPrice: avgPrice || 0,
-                avgVolume: avgVolume || 0,
+                state: state === 'ALL' ? 'US Average' : state, // Update label here
+                avgPrice: d3.mean(yearData, d => d.averagePrice) || 0,
+                avgVolume: d3.mean(yearData, d => d.totalVolume) || 0,
                 hasData: yearData.length > 0
             };
-        }).filter(d => d.hasData)  // Only keep states with data
+        })
+            .filter(d => d.hasData)
             .sort((a, b) => {
-                if (!vis.sortBy) {
-                    return b.avgPrice - a.avgPrice;  // Default sort by price descending
-                } else if (vis.sortBy === "avgPrice") {
+                if (!vis.sortBy || vis.sortBy === "avgPrice") {
                     return b.avgPrice - a.avgPrice;
-                } else {
-                    return b.avgVolume - a.avgVolume;
                 }
+                return b.avgVolume - a.avgVolume;
             });
 
-        // Update current rank display
         this.updateCurrentRankDisplay();
-
         vis.updateVis();
     }
     updateCurrentRankDisplay(state = null) {
@@ -211,5 +204,7 @@ class IndividualState {
         // Exit
         rows.exit().remove();
         cells.exit().remove();
+
+
     }
 }
