@@ -28,13 +28,13 @@ body {
 
 /* "To fruit market owners" text */
 .container_welcome .lead {
-    font-size: 2.6rem;
+    font-size: 4.5rem;
     margin-bottom: 20px;
 }
 
 .container_welcome p,
 .welcome-content .lead{
-    text-align: left;
+    text-align: center;
     font-family: 'Caveat';
 }
 
@@ -87,7 +87,7 @@ fieldset,
 /* Headings */
 h1, h3{
     font-family: 'RockSlayers', sans-serif;
-        color: #fbe2e2;
+        color: #f2c9aee7;
 }
 
 h2 {
@@ -188,7 +188,7 @@ main{
     border: solid 10px #fff4d6;
     height: 83vh;
     width: 100%;
-    font-size: 24px;
+    font-size: 46px;
     line-height: 50px;
     transform: rotate(-1deg);
     box-shadow: 3px 15px 8px -10px rgba(0, 0, 0, 0.3);
