@@ -493,10 +493,10 @@
 }
 
 .narrative-special {
-    padding: 20px;
-    border-radius: 10px;
-    margin: 20px 0;
-    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 10px 80px;
+    background-color: lightyellow;
 }
 
 narrative-special p{

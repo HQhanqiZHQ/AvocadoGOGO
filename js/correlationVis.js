@@ -35,25 +35,47 @@ class CorrelationVis {
             .append("div")
             .attr("class", "controls-container")
             .style("padding", "5px")
-            .style("margin", "0 10px");
+            .style("margin", "10px 10px");
 
         // Set up dimensions
-        vis.margin = { top: 20, right: 200, bottom: 100, left: 80 };
+        vis.margin = { top: 80, right: 200, bottom: 150, left: 80 };
         vis.width = 800 - vis.margin.left - vis.margin.right;
         vis.height = 400 - vis.margin.top - vis.margin.bottom;
-
-        // Create main SVG
+        d3.select(vis.parentElement)
+            .style("height", "500px")  // Fixed container height
+            .style("overflow", "hidden"); // Prevent overflow
+        // Create main SVG with specific size
         vis.svg = d3.select(vis.parentElement)
             .append("svg")
-            .attr("width", "100%")
-            .attr("height", "500px")
+            .attr("width", "800px")
+            .attr("height", "300px")
             .style("display", "block")
-            .style("margin", "0 auto");
+            .style("margin", "20px");
 
+        vis.svg.append("defs")
+            .append("clipPath")
+            .attr("id", "zoom-clip")
+            .append("rect")
+            .attr("width", vis.width)
+            .attr("height", vis.height);
+        // vis.chartGroup.attr("clip-path", "url(#zoom-clip)");
+// Update container padding
+        vis.controlsDiv
+            .style("padding", "5px")
+            .style("margin", "20px 10px 50px 10px");
         // Create zoom container that will hold everything
         vis.zoomContainer = vis.svg.append("g")
             .attr("class", "zoom-container");
-
+        vis.zoom = d3.zoom()
+            .scaleExtent([1, 1.2])
+            .wheelDelta(() => null) // Disable mouse wheel zooming
+            .translateExtent([
+                [0, 0],
+                [vis.width, vis.height]
+            ])
+            .on("zoom", function(event) {
+                vis.handleZoom(event);
+            });
         // Main chart group
         vis.chartGroup = vis.zoomContainer.append("g")
             .attr("transform", `translate(${vis.margin.left},${vis.margin.top})`);
@@ -111,13 +133,6 @@ class CorrelationVis {
         vis.legend = vis.chartGroup.append("g")
             .attr("class", "legend")
             .attr("transform", `translate(${vis.width + 40}, 0)`);
-
-        // Initialize zoom behavior
-        vis.zoom = d3.zoom()
-            .scaleExtent([0.5, 5])
-            .on("zoom", function (event) {
-                vis.handleZoom(event);
-            });
 
         // Add zoom functionality to SVG
         vis.svg.call(vis.zoom);
@@ -284,7 +299,15 @@ class CorrelationVis {
 
     handleZoom(event) {
         let vis = this;
-        vis.zoomContainer.attr("transform", event.transform);
+        const transform = event.transform;
+
+        // Center the transformation
+        const dx = (vis.width - vis.width * transform.k) / 2;
+        const dy = (vis.height - vis.height * transform.k) / 2;
+
+        vis.chartGroup.attr("transform",
+            `translate(${dx + transform.x}, ${dy + transform.y}) scale(${transform.k})`
+        );
     }
 
     handleZoomButton(scale) {
@@ -297,8 +320,26 @@ class CorrelationVis {
     resetZoom() {
         let vis = this;
         vis.svg.transition()
-            .duration(300)
-            .call(vis.zoom.transform, d3.zoomIdentity);
+            .duration(750)
+            .call(vis.zoom.transform, d3.zoomIdentity
+                .translate(vis.margin.left, vis.margin.top));
+    }
+    // Update handleZoom:
+    handleZoom(event) {
+        let vis = this;
+        const transform = event.transform;
+
+        // Apply transformation only to chart content
+        vis.chartGroup.attr("transform", transform);
+
+        // Keep axes stationary but update their scales
+        const newX = transform.rescaleX(vis.x);
+        const newY1 = transform.rescaleY(vis.y1);
+        const newY2 = transform.rescaleY(vis.y2);
+
+        vis.xAxisG.call(vis.xAxis.scale(newX));
+        vis.y1AxisG.call(vis.y1Axis.scale(newY1));
+        vis.y2AxisG.call(vis.y2Axis.scale(newY2));
     }
 
     wrangleData() {
