@@ -31,7 +31,7 @@
 /* Visualization container */
 .visualization {
     width: 100%;
-    height: 400px;
+    height: 600px;
     margin: 10px 0;
     position: relative;
     background: white;
@@ -495,13 +495,14 @@
 .narrative-special {
     padding: 15px;
     border-radius: 8px;
-    margin: 10px 80px;
+    margin-left: 5px;
+    margin-right: 100px;
     background-color: lightyellow;
 }
 
 narrative-special p{
     font-family: 'Patrick Hand', cursive;
-    font-size: 1.1rem;
+    font-size: 0.5rem;
     line-height: 1.6;
 }
 

@@ -46,12 +46,14 @@ h1, h2, h3 {
 /* Narrative text styles */
 .narrative-block p,
 .interesting-fact p,
-.analysis-notes p,
 .regional-insight p {
     font-family: 'Patrick Hand';
 }
 /*End of Load Fonts*/
-
+.analysis-notes p{
+    font-size: 1.4rem;
+    font-family: 'Patrick Hand';
+}
 
 .container-fluid {
     border: white;

@@ -10,45 +10,60 @@ class IndividualState {
     initVis() {
         let vis = this;
 
+        // Style container
         vis.container = d3.select(vis.parentElement)
             .append("div")
             .attr("class", "state-cloud-container")
-            .style("padding", "20px")
-            .style("position", "relative");
+            // .style("padding", "15px")
+            .style("position", "relative")
+            .style("background-color", "#ffffff")
+            .style("border-radius", "8px")
+            .style("box-shadow", "0 2px 4px rgba(0,0,0,0.1)")
+            // .style("margin-bottom", "3px");
 
+        // Header styling
         vis.container.append("h3")
             .style("text-align", "center")
             .style("font-family", "RockSlayers")
             .style("color", "#4a7337")
+            .style("margin", "0 0 20px 0")
+            .style("font-size", "24px")
             .text("State Avocado Market Overview");
 
         this.addYearSelector();
         this.addMetricToggle();
 
+        // Tooltip styling
         vis.tooltip = d3.select("body").append("div")
             .attr("class", "state-tooltip")
             .style("position", "absolute")
-            .style("opacity", 0)
+            .style("opacity", "0")
             .style("background", "white")
-            .style("padding", "10px")
+            .style("padding", "12px")
             .style("border", "1px solid #ddd")
-            .style("border-radius", "5px")
+            .style("border-radius", "6px")
             .style("font-family", "Patrick Hand")
+            .style("font-size", "14px")
             .style("pointer-events", "none")
-            .style("z-index", "100");
+            .style("z-index", "1000")
+            .style("box-shadow", "0 2px 4px rgba(0,0,0,0.1)");
 
+        // Cloud container styling
         vis.cloudContainer = vis.container.append("div")
             .attr("class", "word-cloud")
             .style("width", "800px")
-            .style("height", "500px")
-            .style("margin", "0 auto")
+            .style("height", "600px")
+            .style("margin", "20px auto")
             .style("overflow", "hidden")
             .style("position", "relative")
-            .style("margin-bottom", "50px");
+            .style("background-color", "#fafafa")
+            .style("border-radius", "8px")
+            .style("border", "1px solid #eee");
 
+        // SVG styling
         vis.svg = vis.cloudContainer.append("svg")
             .attr("width", "800")
-            .attr("height", "500")
+            .attr("height", "600")
             .style("display", "block");
 
         this.wrangleData();
@@ -61,17 +76,22 @@ class IndividualState {
 
         const selectorContainer = vis.container.append("div")
             .style("text-align", "center")
-            .style("margin", "20px 0");
+            .style("margin", "20px 0")
+            .style("padding", "10px");
 
         selectorContainer.append("label")
             .style("font-family", "Patrick Hand")
-            .style("margin-right", "10px")
+            .style("margin-right", "15px")
+            .style("font-size", "16px")
             .text("Select Year: ");
 
         selectorContainer.append("select")
-            .style("padding", "5px 10px")
+            .style("padding", "8px 15px")
             .style("font-family", "Patrick Hand")
+            .style("border-radius", "4px")
+            .style("border", "1px solid #4a7337")
             .style("cursor", "pointer")
+            .style("outline", "none")
             .on("change", function() {
                 vis.selectedYear = +this.value;
                 vis.wrangleData();
@@ -84,6 +104,34 @@ class IndividualState {
             .text(d => d);
 
         vis.selectedYear = years[years.length - 1];
+    }
+
+    addMetricToggle() {
+        let vis = this;
+        vis.container.append("div")
+            .style("text-align", "center")
+            .style("margin", "10px 0")
+            .append("button")
+            .style("padding", "8px 15px")
+            .style("font-family", "Patrick Hand")
+            .style("font-size", "14px")
+            .style("cursor", "pointer")
+            .style("background", "#4a7337")
+            .style("color", "white")
+            .style("border", "none")
+            .style("border-radius", "5px")
+            .style("transition", "background-color 0.3s")
+            .text("Toggle Size by Price/Volume")
+            .on("mouseover", function() {
+                d3.select(this).style("background", "#5a8347");
+            })
+            .on("mouseout", function() {
+                d3.select(this).style("background", "#4a7337");
+            })
+            .on("click", () => {
+                vis.sortMetric = vis.sortMetric === "avgPrice" ? "avgVolume" : "avgPrice";
+                vis.wrangleData();
+            });
     }
 
     addMetricToggle() {
@@ -205,3 +253,4 @@ class IndividualState {
         }
     }
 }
+
