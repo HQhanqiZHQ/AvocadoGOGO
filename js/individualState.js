@@ -109,10 +109,10 @@ class IndividualState {
             .style("color", "white")
             .style("border", "none")
             .style("border-radius", "5px")
-            .text(`Text size represents: ${vis.sortMetric === "avgPrice" ? "Price" : "Volume"}`)
+            .text(`Rank by ${vis.sortMetric === "avgPrice" ? "Price" : "Volume"}`)
             .on("click", () => {
                 vis.sortMetric = vis.sortMetric === "avgPrice" ? "avgVolume" : "avgPrice";
-                vis.metricButton.text(`Text size represents: ${vis.sortMetric === "avgPrice" ? "Price" : "Volume"}`);
+                vis.metricButton.text(`Rank by ${vis.sortMetric === "avgPrice" ? "Price" : "Volume"}`);
                 vis.wrangleData();
             });
     }
@@ -165,8 +165,8 @@ class IndividualState {
 
         function draw(words) {
             const colorScale = d3.scaleSequential()
-                .domain(d3.extent(vis.wordData, d => d.avgPrice))
-                .interpolator(d3.interpolateGreens);
+                .domain(d3.extent(vis.wordData, d => d.avgPrice).reverse()) // Reverse to map high -> red and low -> blue
+                .interpolator(d3.interpolateRdBu)
 
             // Draw main word cloud
             const group = vis.svg.append("g")
@@ -223,7 +223,7 @@ class IndividualState {
                 .attr("x", 0)
                 .attr("y", -10)
                 .style("font-family", "Patrick Hand")
-                .text("Price Range:");
+                .text(`${vis.sortMetric === "avgPrice" ? "Price" : "Volume"} range`);
 
             const colorLegend = legend.append("g");
             const gradient = vis.svg.append("defs")
@@ -234,10 +234,10 @@ class IndividualState {
 
             gradient.append("stop")
                 .attr("offset", "0%")
-                .attr("stop-color", '#2E7D32');
+                .attr("stop-color", 'red'); // high
             gradient.append("stop")
                 .attr("offset", "100%")
-                .attr("stop-color", '#E8F5E9');
+                .attr("stop-color", 'blue');
 
             colorLegend.append("rect")
                 .attr("width", 20)
@@ -266,7 +266,7 @@ class IndividualState {
                 .attr("x", 0)
                 .attr("y", -10)
                 .style("font-family", "Patrick Hand")
-                .text("Volume Range:");
+                .text(`${vis.sortMetric === "avgPrice" ? "Volume" : "Price"} range`);
 
             // Example sizes
             [20, 40, 60].forEach((size, i) => {
