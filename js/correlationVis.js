@@ -7,7 +7,9 @@ class CorrelationVis {
         this.colors = {
             'organic': '#4a7337',
             'conventional': '#6b8c21',
-            'all': '#ddd48f'
+            'all': '#ddd48f',
+            'line': '#FF6B6B',  // New color for line
+            'bar': '#4ECDC4'    // New color for bar
         };
         this.initVis();
     }
@@ -387,18 +389,16 @@ class CorrelationVis {
 
     updateVis() {
         let vis = this;
-
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
             'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-        // Update scales
+        // Update scales and axes
         vis.x.domain(months);
         vis.y1.domain([0, d3.max(vis.displayData, d => d.avgPrice) * 1.1]);
         vis.y2.domain([0, d3.max(vis.displayData, d => d.totalVolume) * 1.1]);
 
         // Update axes
-        vis.xAxisG
-            .transition().duration(1000)
+        vis.xAxisG.transition().duration(1000)
             .call(vis.xAxis)
             .selectAll("text")
             .style("text-anchor", "end")
@@ -406,39 +406,28 @@ class CorrelationVis {
             .attr("dy", ".15em")
             .attr("transform", "rotate(-45)");
 
-        vis.y1AxisG
-            .transition().duration(1000)
-            .call(vis.y1Axis);
+        vis.y1AxisG.transition().duration(1000).call(vis.y1Axis);
+        vis.y2AxisG.transition().duration(1000).call(vis.y2Axis);
 
-        vis.y2AxisG
-            .transition().duration(1000)
-            .call(vis.y2Axis);
-
-        // Update bars with tooltips
+        // Update bars
         const bars = vis.chartGroup.selectAll(".volume-bar")
             .data(vis.displayData);
-        vis.chartGroup.selectAll(".volume-bar")
-            .on("mouseout", function (event, d) {
-                d3.select(this)
-                    .style("opacity", 0.3)
-                    .attr("stroke", "none");
 
-                vis.tooltip.style("opacity", 0);
-            });
         bars.exit().remove();
 
         const barsEnter = bars.enter()
             .append("rect")
             .attr("class", "volume-bar");
 
-        const barsMerged = barsEnter.merge(bars)
+        barsEnter.merge(bars)
             .transition().duration(1000)
             .attr("x", d => vis.x(months[d.month]))
             .attr("y", d => vis.y2(d.totalVolume))
             .attr("width", vis.x.bandwidth())
             .attr("height", d => vis.height - vis.y2(d.totalVolume))
-            .attr("fill", vis.colors[vis.selectedType])
+            .attr("fill", vis.colors.bar)
             .style("opacity", 0.3);
+
         // Create line generator
         const line = d3.line()
             .x(d => vis.x(months[d.month]) + vis.x.bandwidth() / 2)
@@ -451,41 +440,31 @@ class CorrelationVis {
 
         path.exit().remove();
 
-        const pathEnter = path.enter()
+        path.enter()
             .append("path")
-            .attr("class", "trend-line");
-
-        pathEnter.merge(path)
+            .attr("class", "trend-line")
+            .merge(path)
             .transition().duration(1000)
             .attr("d", line)
             .attr("fill", "none")
-            .attr("stroke", vis.colors[vis.selectedType])
+            .attr("stroke", vis.colors.line)
             .attr("stroke-width", 3);
 
         // Update points
         const points = vis.chartGroup.selectAll(".data-point")
             .data(vis.displayData);
-        vis.chartGroup.selectAll(".data-point")
-            .on("mouseout", function (event, d) {
-                d3.select(this)
-                    .attr("r", 5)
-                    .attr("stroke", "none");
-
-                vis.tooltip.style("opacity", 0);
-            });
 
         points.exit().remove();
 
-        const pointsEnter = points.enter()
+        points.enter()
             .append("circle")
-            .attr("class", "data-point");
-
-        pointsEnter.merge(points)
+            .attr("class", "data-point")
+            .merge(points)
             .transition().duration(1000)
             .attr("cx", d => vis.x(months[d.month]) + vis.x.bandwidth() / 2)
             .attr("cy", d => vis.y1(d.avgPrice))
             .attr("r", 5)
-            .attr("fill", vis.colors[vis.selectedType]);
+            .attr("fill", vis.colors.line);
         // Update tooltips to include period information
         vis.chartGroup.selectAll(".volume-bar")
             .on("mouseover", function (event, d) {
@@ -493,6 +472,13 @@ class CorrelationVis {
                     .style("opacity", 0.5)
                     .attr("stroke", "#fff")
                     .attr("stroke-width", 2);
+        vis.chartGroup.selectAll(".volume-bar")
+                    .on("mouseout", function(event, d) {
+                        d3.select(this)
+                            .style("opacity", 0.3)
+                            .attr("stroke", "none");
+                        vis.tooltip.style("opacity", 0);
+                    });;
 
                 vis.tooltip
                     .style("opacity", 1)
@@ -533,23 +519,26 @@ class CorrelationVis {
         // Update legend title to include period
         vis.legend.select("text")
             .text(`${vis.selectedType.charAt(0).toUpperCase() + vis.selectedType.slice(1)} Metrics (${vis.startYear}-${vis.endYear})`);
+
+        // Update legend
+        this.updateLegend();
     }
 
     updateLegend() {
         let vis = this;
 
-        // Remove old legend items
+        // Clear existing legend
         vis.legend.selectAll("*").remove();
 
-        // Add title
+        // Add title with period
         vis.legend.append("text")
             .attr("x", 0)
             .attr("y", 0)
             .style("font-family", "Patrick Hand")
             .style("font-weight", "bold")
-            .text(`${vis.selectedType.charAt(0).toUpperCase() + vis.selectedType.slice(1)} Metrics`);
+            .text(`${vis.startYear}-${vis.endYear} Metrics`);
 
-        // Add price line item
+        // Price line legend item
         const priceLegend = vis.legend.append("g")
             .attr("transform", "translate(0, 30)");
 
@@ -558,29 +547,34 @@ class CorrelationVis {
             .attr("x2", 20)
             .attr("y1", 0)
             .attr("y2", 0)
-            .attr("stroke", vis.colors[vis.selectedType])
+            .attr("stroke", vis.colors.line)
             .attr("stroke-width", 3);
+
+        priceLegend.append("circle")
+            .attr("cx", 10)
+            .attr("cy", 0)
+            .attr("r", 4)
+            .attr("fill", vis.colors.line);
 
         priceLegend.append("text")
             .attr("x", 30)
             .attr("y", 5)
             .style("font-family", "Patrick Hand")
-            .text("Price");
+            .text("Average Price");
 
-        // Add volume bar item
+        // Volume bar legend item
         const volumeLegend = vis.legend.append("g")
             .attr("transform", "translate(0, 60)");
 
         volumeLegend.append("rect")
             .attr("width", 20)
             .attr("height", 20)
-            .attr("fill", vis.colors[vis.selectedType])
+            .attr("fill", vis.colors.bar)
             .style("opacity", 0.3);
 
         volumeLegend.append("text")
             .attr("x", 30)
             .attr("y", 15)
             .style("font-family", "Patrick Hand")
-            .text("Volume");
-    }
-}
+            .text("Total Volume");
+    }}
