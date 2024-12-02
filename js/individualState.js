@@ -104,17 +104,18 @@ class IndividualState {
     wrangleData() {
         let vis = this;
 
-        // Process data for each state
-        vis.tableData = Object.entries(vis.data).map(([state, stateData]) => {
-            const yearData = stateData.filter(d => d.year === vis.selectedYear);
+        vis.tableData = Object.entries(vis.data)
+            .filter(([state, _]) => state !== 'ALL') // Exclude ALL/US Average
+            .map(([state, stateData]) => {
+                const yearData = stateData.filter(d => d.year === vis.selectedYear);
 
-            return {
-                state: state === 'ALL' ? 'US Average' : state, // Update label here
-                avgPrice: d3.mean(yearData, d => d.averagePrice) || 0,
-                avgVolume: d3.mean(yearData, d => d.totalVolume) || 0,
-                hasData: yearData.length > 0
-            };
-        })
+                return {
+                    state: state,
+                    avgPrice: d3.mean(yearData, d => d.averagePrice) || 0,
+                    avgVolume: d3.mean(yearData, d => d.totalVolume) || 0,
+                    hasData: yearData.length > 0
+                };
+            })
             .filter(d => d.hasData)
             .sort((a, b) => {
                 if (!vis.sortBy || vis.sortBy === "avgPrice") {
