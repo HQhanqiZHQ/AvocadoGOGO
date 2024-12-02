@@ -268,11 +268,10 @@ class PriceVisualization {
         // Update legend
         vis.updateLegend();
     }
-
     addExtremePoints(extremePoints, type) {
         let vis = this;
 
-        // Add avocado icons
+        // Add avocado icons with dots
         let icons = vis.svg.selectAll(`.extreme-icon-${type}`)
             .data(extremePoints);
 
@@ -282,55 +281,86 @@ class PriceVisualization {
             .append("g")
             .attr("class", `extreme-icon extreme-icon-${type}`);
 
+        // Add avocado icons
         iconsEnter.append("image")
             .attr("xlink:href", "img/icons/avocado slider.png")
             .attr("width", vis.iconSize)
             .attr("height", vis.iconSize)
             .attr("clip-path", "url(#clip)");
 
+        // Add dots at peaks and troughs
+        iconsEnter.append("circle")
+            .attr("class", "peak-dot")
+            .attr("r", 4)
+            .attr("fill", vis.colorScale(type))
+            .attr("stroke", "white")
+            .attr("stroke-width", 2);
+
         icons = iconsEnter.merge(icons)
             .attr("transform", d => `translate(
-                ${vis.x(d.date) - vis.iconSize/2},
-                ${vis.y(d[type]) - (d.isPeak ? vis.iconSize + 5 : -5)}
-            )`);
+            ${vis.x(d.date) - vis.iconSize/2},
+            ${vis.y(d[type]) - (d.isPeak ? vis.iconSize + 5 : -5)}
+        )`);
 
-        // Add tooltips and interactivity
+        // Update icons and add interactions
         icons.select("image")
             .style("transform-origin", "center")
             .style("transform", d => d.isPeak ? "rotate(0deg)" : "rotate(180deg)")
             .style("opacity", d => d.isPeak ? 0.8 : 0.6)
             .on("mouseover", function(event, d) {
-                d3.select(this)
+                const icon = d3.select(this.parentNode);
+
+                icon.select("image")
                     .transition()
                     .duration(200)
                     .style("opacity", 1)
                     .attr("width", vis.iconSize * 1.2)
                     .attr("height", vis.iconSize * 1.2);
 
+                icon.select("circle")
+                    .transition()
+                    .duration(200)
+                    .attr("r", 6)
+                    .style("opacity", 1);
+
                 vis.tooltip
                     .style("opacity", 1)
                     .html(`
-                        <div style="font-family: Patrick Hand;">
-                            <strong>${d.isPeak ? 'Yearly Peak' : 'Yearly Low'}</strong><br/>
-                            <strong>Date:</strong> ${d3.timeFormat("%B %Y")(d.date)}<br/>
-                            <strong>Season:</strong> ${d.season}<br/>
-                            <strong>Price:</strong> $${d[type].toFixed(2)}<br/>
-                            <strong>Volume:</strong> ${d3.format(",")(d.totalVolume)}
-                        </div>
-                    `)
+                    <div style="font-family: Patrick Hand;">
+                        <strong>${d.isPeak ? 'Yearly Peak' : 'Yearly Low'}</strong><br/>
+                        <strong>Date:</strong> ${d3.timeFormat("%B %Y")(d.date)}<br/>
+                        <strong>Season:</strong> ${d.season}<br/>
+                        <strong>Price:</strong> $${d[type].toFixed(2)}<br/>
+                        <strong>Volume:</strong> ${d3.format(",")(d.totalVolume)}
+                    </div>
+                `)
                     .style("left", (event.pageX + 10) + "px")
                     .style("top", (event.pageY - 10) + "px");
             })
             .on("mouseout", function() {
-                d3.select(this)
+                const icon = d3.select(this.parentNode);
+
+                icon.select("image")
                     .transition()
                     .duration(200)
                     .style("opacity", d => d.isPeak ? 0.8 : 0.6)
                     .attr("width", vis.iconSize)
                     .attr("height", vis.iconSize);
 
+                icon.select("circle")
+                    .transition()
+                    .duration(200)
+                    .attr("r", 4)
+                    .style("opacity", 0.8);
+
                 vis.tooltip.style("opacity", 0);
             });
+
+        // Update dots position
+        icons.select("circle")
+            .attr("cx", vis.iconSize/2)
+            .attr("cy", d => d.isPeak ? vis.iconSize + 5 : -5)
+            .style("opacity", 0.8);
 
         // Add connecting lines
         let yearlyGroups = Array.from(d3.group(extremePoints, d => d.date.getFullYear()));
@@ -358,7 +388,6 @@ class PriceVisualization {
                     .curve(d3.curveMonotoneX)(points);
             });
     }
-
     updateLegend() {
         let vis = this;
         vis.svg.selectAll(".legend").remove();
@@ -422,6 +451,11 @@ const styles = `
     }
     .price-area {
         transition: all 0.5s;
+    }
+    .peak-dot {
+    transition: all 0.2s;
+    cursor: pointer;
+    pointer-events: none;
     }
 `;
 
