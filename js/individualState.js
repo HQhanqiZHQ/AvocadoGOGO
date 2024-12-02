@@ -109,10 +109,10 @@ class IndividualState {
             .style("color", "white")
             .style("border", "none")
             .style("border-radius", "5px")
-            .text(`Currently showing: Size by ${vis.sortMetric === "avgPrice" ? "Price" : "Volume"}`)
+            .text(`Text size represents: ${vis.sortMetric === "avgPrice" ? "Price" : "Volume"}`)
             .on("click", () => {
                 vis.sortMetric = vis.sortMetric === "avgPrice" ? "avgVolume" : "avgPrice";
-                vis.metricButton.text(`Currently showing: Size by ${vis.sortMetric === "avgPrice" ? "Price" : "Volume"}`);
+                vis.metricButton.text(`Text size represents: ${vis.sortMetric === "avgPrice" ? "Price" : "Volume"}`);
                 vis.wrangleData();
             });
     }
@@ -129,8 +129,13 @@ class IndividualState {
                     avgVolume: d3.mean(yearData, d => d.totalVolume) || 0
                 };
             })
-            .filter(d => d.avgPrice > 0);
+            .filter(d => d.avgPrice > 0)
+            .sort((a, b) => b[vis.sortMetric] - a[vis.sortMetric]);  // Sort by current metric
 
+        // Add rank property
+        vis.wordData.forEach((d, i) => {
+            d.rank = i + 1;
+        });
         const volumeScale = d3.scaleLog()
             .domain([d3.min(vis.wordData, d => d.avgVolume),
                 d3.max(vis.wordData, d => d.avgVolume)])
@@ -161,7 +166,7 @@ class IndividualState {
         function draw(words) {
             const colorScale = d3.scaleSequential()
                 .domain(d3.extent(vis.wordData, d => d.avgPrice))
-                .interpolator(d3.interpolateRdBu);
+                .interpolator(d3.interpolateGreens);
 
             // Draw main word cloud
             const group = vis.svg.append("g")
@@ -190,12 +195,13 @@ class IndividualState {
                         .style("left", (event.pageX + 10) + "px")
                         .style("top", (event.pageY - 10) + "px")
                         .html(`
-                            <div style="font-family: Patrick Hand">
-                                <strong>${d.text}</strong><br/>
-                                Price: $${d.avgPrice.toFixed(2)}<br/>
-                                Volume: ${d3.format(",")(Math.round(d.avgVolume))}
-                            </div>
-                        `);
+    <div style="font-family: Patrick Hand">
+        <strong>${d.text}</strong><br/>
+        Price: $${d.avgPrice.toFixed(2)}<br/>
+        Volume: ${d3.format(",")(Math.round(d.avgVolume))}<br/>
+        Rank by ${vis.sortMetric === "avgPrice" ? "Price" : "Volume"}: ${d.rank}/${vis.wordData.length}
+    </div>
+`);
                 })
                 .on("mouseout", function(event, d) {
                     d3.select(this)
@@ -228,10 +234,10 @@ class IndividualState {
 
             gradient.append("stop")
                 .attr("offset", "0%")
-                .attr("stop-color", d3.interpolateRdBu(1));
+                .attr("stop-color", '#2E7D32');
             gradient.append("stop")
                 .attr("offset", "100%")
-                .attr("stop-color", d3.interpolateRdBu(0));
+                .attr("stop-color", '#E8F5E9');
 
             colorLegend.append("rect")
                 .attr("width", 20)
