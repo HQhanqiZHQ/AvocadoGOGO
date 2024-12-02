@@ -2,64 +2,77 @@ class IndividualState {
     constructor(parentElement, data) {
         this.parentElement = parentElement;
         this.data = data;
+        this.selectedYear = null;
+        this.sortMetric = "avgPrice";
         this.initVis();
     }
 
     initVis() {
         let vis = this;
 
-        // Create title and container for the table
         vis.container = d3.select(vis.parentElement)
             .append("div")
-            .attr("class", "state-price-container")
-            .style("padding", "10px");
+            .attr("class", "state-cloud-container")
+            .style("padding", "20px")
+            .style("position", "relative");
 
-        // Add title
         vis.container.append("h3")
             .style("text-align", "center")
             .style("font-family", "RockSlayers")
             .style("color", "#4a7337")
-            .text("Avocado Prices by State");
+            .text("State Avocado Market Overview");
 
-        // Create year selector
         this.addYearSelector();
+        this.addMetricToggle();
 
-        // Create sort button and current rank display
-        this.addSortButton();
+        vis.tooltip = d3.select("body").append("div")
+            .attr("class", "state-tooltip")
+            .style("position", "absolute")
+            .style("opacity", 0)
+            .style("background", "white")
+            .style("padding", "10px")
+            .style("border", "1px solid #ddd")
+            .style("border-radius", "5px")
+            .style("font-family", "Patrick Hand")
+            .style("pointer-events", "none")
+            .style("z-index", "100");
 
-        // Create table container
-        vis.tableContainer = vis.container.append("div")
-            .attr("class", "table-container")
-            .style("max-height", "400px")
-            .style("overflow-y", "auto")
-            .style("margin-top", "20px");
+        vis.cloudContainer = vis.container.append("div")
+            .attr("class", "word-cloud")
+            .style("width", "800px")
+            .style("height", "500px")
+            .style("margin", "0 auto")
+            .style("overflow", "hidden")
+            .style("position", "relative")
+            .style("margin-bottom", "50px");
+
+        vis.svg = vis.cloudContainer.append("svg")
+            .attr("width", "800")
+            .attr("height", "500")
+            .style("display", "block");
 
         this.wrangleData();
     }
 
     addYearSelector() {
         let vis = this;
-
-        // Get available years
         const years = [...new Set(Object.values(vis.data)
             .flatMap(stateData => stateData.map(d => d.year)))].sort();
 
-        // Create selector container
         const selectorContainer = vis.container.append("div")
             .style("text-align", "center")
             .style("margin", "20px 0");
 
-        // Add label
         selectorContainer.append("label")
             .style("font-family", "Patrick Hand")
             .style("margin-right", "10px")
             .text("Select Year: ");
 
-        // Add select element
         selectorContainer.append("select")
             .style("padding", "5px 10px")
             .style("font-family", "Patrick Hand")
-            .on("change", function () {
+            .style("cursor", "pointer")
+            .on("change", function() {
                 vis.selectedYear = +this.value;
                 vis.wrangleData();
             })
@@ -70,142 +83,125 @@ class IndividualState {
             .attr("value", d => d)
             .text(d => d);
 
-        // Set initial year
         vis.selectedYear = years[years.length - 1];
     }
-    addSortButton() {
+
+    addMetricToggle() {
         let vis = this;
-
-        // Create sort button and current rank container
-        const sortButtonContainer = vis.container.append("div")
+        vis.container.append("div")
             .style("text-align", "center")
-            .style("margin", "20px 0");
-
-        // Add sort button
-        vis.sortButton = sortButtonContainer.append("button")
-            .style("padding", "5px 10px")
+            .style("margin", "10px 0")
+            .append("button")
+            .style("padding", "8px 15px")
             .style("font-family", "Patrick Hand")
-            .text("Switch to Rank of Price/Volume")
-            .on("click", function () {
-                vis.sortBy = vis.sortBy === "avgPrice" ? "avgVolume" : "avgPrice";
-                vis.updateButtonText();
+            .style("cursor", "pointer")
+            .style("background", "#4a7337")
+            .style("color", "white")
+            .style("border", "none")
+            .style("border-radius", "5px")
+            .text("Toggle Size by Price/Volume")
+            .on("click", () => {
+                vis.sortMetric = vis.sortMetric === "avgPrice" ? "avgVolume" : "avgPrice";
                 vis.wrangleData();
             });
+    }
 
-        // Add current rank display
-        vis.currentRankDisplay = sortButtonContainer.append("span")
-            .style("margin-left", "20px")
-            .style("font-family", "Patrick Hand");
-    }
-    updateButtonText() {
-        let vis = this;
-        vis.sortButton.text(`Switch to Rank of ${vis.sortBy === "avgPrice" ? "Volume" : "Price"}`);
-    }
     wrangleData() {
         let vis = this;
 
-        vis.tableData = Object.entries(vis.data)
-            .filter(([state, _]) => state !== 'ALL') // Exclude ALL/US Average
+        vis.wordData = Object.entries(vis.data)
+            .filter(([state, _]) => state !== 'ALL')
             .map(([state, stateData]) => {
                 const yearData = stateData.filter(d => d.year === vis.selectedYear);
-
                 return {
-                    state: state,
+                    text: state,
                     avgPrice: d3.mean(yearData, d => d.averagePrice) || 0,
-                    avgVolume: d3.mean(yearData, d => d.totalVolume) || 0,
-                    hasData: yearData.length > 0
+                    avgVolume: d3.mean(yearData, d => d.totalVolume) || 0
                 };
             })
-            .filter(d => d.hasData)
-            .sort((a, b) => {
-                if (!vis.sortBy || vis.sortBy === "avgPrice") {
-                    return b.avgPrice - a.avgPrice;
-                }
-                return b.avgVolume - a.avgVolume;
-            });
+            .filter(d => d.avgPrice > 0);
 
-        this.updateCurrentRankDisplay();
+        const metric = vis.sortMetric === "avgPrice" ? "avgPrice" : "avgVolume";
+        const sizeScale = d3.scaleLog()
+            .domain([d3.min(vis.wordData, d => d[metric]),
+                d3.max(vis.wordData, d => d[metric])])
+            .range([20, 50]);
+
+        vis.wordData.forEach(d => {
+            d.size = sizeScale(d[metric]);
+        });
+
         vis.updateVis();
     }
-    updateCurrentRankDisplay(state = null) {
-        let vis = this;
-        let currentRank;
-        if (state) {
-            currentRank = vis.tableData.findIndex(d => d.state === state) + 1;
-        } else {
-            currentRank = vis.tableData.findIndex(d => d.state === vis.selectedState) + 1;
-        }
-        vis.currentRankDisplay.text(`Current Rank: ${currentRank}`);
-    }
+
     updateVis() {
         let vis = this;
+        vis.svg.selectAll("*").remove();
 
-        // Create table
-        const table = vis.tableContainer.selectAll("table").data([0]);
-        const tableEnter = table.enter()
-            .append("table")
-            .style("width", "100%")
-            .style("border-collapse", "collapse")
-            .style("font-family", "Patrick Hand");
+        const layout = d3.layout.cloud()
+            .size([800, 500])
+            .words(vis.wordData)
+            .padding(15)
+            .rotate(() => (~~(Math.random() * 2)) * 90)
+            .fontSize(d => d.size)
+            .spiral("archimedean")
+            .on("end", draw);
 
-        // Update table header
-        const header = tableEnter.append("thead")
-            .append("tr");
+        layout.start();
 
-        header.selectAll("th")
-            .data(["State", "Average Price", "Average Volume"])
-            .enter()
-            .append("th")
-            .style("background-color", "#4a7337")
-            .style("color", "white")
-            .style("padding", "10px")
-            .text(d => d)
-            .style("text-align", "left");
+        function draw(words) {
+            const colorScale = d3.scaleSequential()
+                .domain(d3.extent(vis.wordData, d => d[vis.sortMetric]))
+                .interpolator(d3.interpolateGreens);
 
-        // Update table body
-        const tbody = table.merge(tableEnter).selectAll("tbody")
-            .data([vis.tableData]);
+            const group = vis.svg.append("g")
+                .attr("transform", "translate(400,250)")
+                .selectAll("text")
+                .data(words)
+                .enter()
+                .append("text")
+                .style("font-family", "Patrick Hand")
+                .style("fill", d => colorScale(d[vis.sortMetric]))
+                .style("cursor", "pointer")
+                .attr("text-anchor", "middle")
+                .attr("transform", d => `translate(${d.x},${d.y})rotate(${d.rotate})`)
+                .attr("font-size", d => `${d.size}px`)
+                .text(d => d.text)
+                .style("opacity", 0)
+                .on("mouseover", function(event, d) {
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .style("font-size", `${d.size * 1.2}px`)
+                        .style("font-weight", "bold");
 
-        const tbodyEnter = tbody.enter()
-            .append("tbody");
+                    vis.tooltip
+                        .style("opacity", 1)
+                        .style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY - 10) + "px")
+                        .html(`
+                            <div style="font-family: Patrick Hand">
+                                <strong>${d.text}</strong><br/>
+                                Price: $${d.avgPrice.toFixed(2)}<br/>
+                                Volume: ${d3.format(",")(Math.round(d.avgVolume))}<br/>
+                                Rank: ${vis.wordData.indexOf(d) + 1}/${vis.wordData.length}
+                            </div>
+                        `);
+                })
+                .on("mouseout", function(event, d) {
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .style("font-size", `${d.size}px`)
+                        .style("font-weight", "normal");
 
-        // Update rows
-        const rows = tbody.merge(tbodyEnter).selectAll("tr")
-            .data(d => d);
+                    vis.tooltip.style("opacity", 0);
+                });
 
-        const rowsEnter = rows.enter()
-            .append("tr")
-            .style("cursor", "pointer")
-            .style("transition", "background-color 0.3s")
-            .on("mouseover", function (event, d) {
-                d3.select(this).style("background-color", "#f0f7ed");
-                vis.updateCurrentRankDisplay(d.state);
-            })
-            .on("mouseout", function () {
-                d3.select(this).style("background-color", "white");
-                vis.updateCurrentRankDisplay();
-            });
-
-        // Update cells
-        const cells = rows.merge(rowsEnter).selectAll("td")
-            .data(d => [
-                d.state,
-                `$${d.avgPrice.toFixed(2)}`,
-                d3.format(",")(Math.round(d.avgVolume))
-            ]);
-
-        cells.enter()
-            .append("td")
-            .merge(cells)
-            .style("padding", "8px")
-            .style("border-bottom", "1px solid #ddd")
-            .style("text-align", (d, i) => i === 0 ? "left" : "left")
-            .text(d => d);
-
-        // Exit
-        rows.exit().remove();
-        cells.exit().remove();
-
-
+            group.transition()
+                .delay((d, i) => i * 20)
+                .duration(1000)
+                .style("opacity", 1);
+        }
     }
 }
