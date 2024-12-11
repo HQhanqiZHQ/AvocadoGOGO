@@ -12,7 +12,7 @@ class MultiStates {
 
     initVis() {
         let vis = this;
-        console.log(this.cityData)
+        // console.log(this.cityData)
         // Set up chart dimensions
         const container = d3.select(vis.parentElement).node().getBoundingClientRect();
         vis.margin = { top: 60, right: container.width * 0.4, bottom: 60, left: 80 }; // Set right margin to 40% of container width
