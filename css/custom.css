@@ -525,3 +525,63 @@ main{
     margin: 1rem 0;
     background: #fff;
 }
+
+/* Price visualization styles */
+
+.extreme-icon {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.extreme-icon:hover {
+    filter: brightness(1.2);
+}
+
+.year-connector {
+    pointer-events: none;
+    transition: all 1s;
+}
+
+.chart-title {
+    font-weight: bold;
+    fill: #4a7337;
+}
+
+.tooltip {
+    background-color: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.view-btn {
+    transition: all 0.3s ease;
+}
+
+.view-btn:hover {
+    transform: translateY(-2px);
+}
+
+.price-line {
+    transition: all 0.5s;
+}
+
+.price-area {
+    transition: all 0.5s;
+}
+
+.peak-dot {
+    transition: all 0.2s;
+    cursor: pointer;
+    pointer-events: none;
+}
+
+.overlay {
+    cursor: pointer;
+}
+
+.bottom-tooltip {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: opacity 0.3s;
+    white-space: nowrap;
+}
