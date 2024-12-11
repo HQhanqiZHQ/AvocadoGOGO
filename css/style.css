@@ -1,6 +1,6 @@
 /* Section styles */
 .full-height {
-    min-height: 100vh;
+    min-height: auto;
     /*width: 100%;*/
     max-width: 1200px;
     display: flex;
@@ -10,6 +10,8 @@
     position: relative;
     scroll-snap-align: start;
     scroll-snap-stop: always;
+    scroll-margin-top: 0; /* Add this */
+    margin-bottom: 100vh; /* Add this to force full section visibility */
 }
 
 .section-content {
@@ -440,15 +442,6 @@
     box-shadow: 0 0 0 3px rgba(86, 130, 3, 0.2);
 }
 
-/* Container for transitional messages */
-/*.container_message {*/
-/*    background-color: #fff;*/
-/*    border-radius: 15px;*/
-/*    padding: 30px;*/
-/*    margin: 20px;*/
-/*    box-shadow: 0 4px 6px rgba(0,0,0,0.1);*/
-/*    transition: all 0.3s ease;*/
-/*}*/
 
 /* Transition text styling */
 .transition-text {
