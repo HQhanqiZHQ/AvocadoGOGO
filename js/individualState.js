@@ -3,8 +3,7 @@ class IndividualState {
         this.parentElement = parentElement;
         this.data = data;
         this.selectedYear = null;
-        this.sortMetric = "avgVolume"; // Default sort by volume
-        // Add state name mapping
+        this.sortMetric = "avgVolume";
         this.stateMapping = {
             'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas',
             'CA': 'California', 'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware',
@@ -26,14 +25,20 @@ class IndividualState {
     initVis() {
         let vis = this;
 
+        // Main container setup
         vis.container = d3.select(vis.parentElement)
             .append("div")
-            .attr("class", "state-cloud-container")
+            .attr("class", "state-visualization-container")
             .style("position", "relative")
             .style("background-color", "#ffffff")
             .style("border-radius", "8px")
-            .style("box-shadow", "0 2px 4px rgba(0,0,0,0.1)");
+            .style("box-shadow", "0 2px 4px rgba(0,0,0,0.1)")
+            .style("padding", "20px");
 
+        vis.width = 800;
+        vis.height = 600;
+
+        // Add title
         vis.container.append("h3")
             .style("text-align", "center")
             .style("font-family", "RockSlayers")
@@ -42,9 +47,49 @@ class IndividualState {
             .style("font-size", "24px")
             .text("State Avocado Market Overview");
 
-        this.addYearSelector();
-        this.addMetricToggle();
+        // Controls container
+        const controlsContainer = vis.container.append("div")
+            .attr("class", "controls-container")
+            .style("display", "flex")
+            .style("justify-content", "center")
+            .style("gap", "20px")
+            .style("margin-bottom", "20px");
 
+        // Add controls
+        this.addYearSelector(controlsContainer);
+        this.addMetricToggle(controlsContainer);
+
+        // Create container for visualizations
+        const visContainer = vis.container.append("div")
+            .attr("class", "visualizations-container")
+            .style("display", "flex")
+            .style("justify-content", "space-between")
+            .style("margin-top", "20px");
+
+        // Word cloud container
+        vis.wordCloudContainer = visContainer.append("div")
+            .attr("class", "word-cloud-container")
+            .style("width", "50%")
+            .style("height", "600px");
+
+        // Circle visualization container
+        vis.circleContainer = visContainer.append("div")
+            .attr("class", "circle-container")
+            .style("width", "50%")
+            .style("height", "600px");
+
+        // Initialize SVGs
+        vis.wordCloudSvg = vis.wordCloudContainer.append("svg")
+            .attr("width", "100%")
+            .attr("height", "100%");
+
+        vis.circleSvg = vis.circleContainer.append("svg")
+            .attr("width", "100%")
+            .attr("height", "100%")
+            .append("g")
+            .attr("transform", `translate(${vis.width/4},${vis.height/2})`);
+
+        // Initialize tooltip
         vis.tooltip = d3.select("body").append("div")
             .attr("class", "state-tooltip")
             .style("position", "absolute")
@@ -59,40 +104,21 @@ class IndividualState {
             .style("z-index", "1000")
             .style("box-shadow", "0 2px 4px rgba(0,0,0,0.1)");
 
-        vis.cloudContainer = vis.container.append("div")
-            .attr("class", "word-cloud")
-            .style("width", "800px")
-            .style("height", "600px")
-            .style("margin", "20px auto")
-            .style("overflow", "hidden")
-            .style("position", "relative")
-            .style("background-color", "#fafafa")
-            .style("border-radius", "8px")
-            .style("border", "1px solid #eee");
-
-        vis.svg = vis.cloudContainer.append("svg")
-            .attr("width", "800")
-            .attr("height", "600")
-            .style("display", "block");
+        // Initialize force simulation for circles
+        vis.simulation = d3.forceSimulation()
+            .force("center", d3.forceCenter(0, 0))
+            .force("charge", d3.forceManyBody().strength(50))
+            .force("collide", d3.forceCollide().radius(d => d.radius + 2))
+            .on("tick", () => vis.ticked());
 
         this.wrangleData();
     }
-
-    addYearSelector() {
+    addYearSelector(container) {
         let vis = this;
         const years = [...new Set(Object.values(vis.data)
             .flatMap(stateData => stateData.map(d => d.year)))].sort();
 
-        const selectorContainer = vis.container.append("div")
-            .style("text-align", "center")
-            .style("margin", "20px 0");
-
-        selectorContainer.append("label")
-            .style("font-family", "Patrick Hand")
-            .style("margin-right", "15px")
-            .text("Select Year: ");
-
-        selectorContainer.append("select")
+        const select = container.append("select")
             .style("padding", "8px 15px")
             .style("font-family", "Patrick Hand")
             .style("border-radius", "4px")
@@ -101,8 +127,9 @@ class IndividualState {
             .on("change", function() {
                 vis.selectedYear = +this.value;
                 vis.wrangleData();
-            })
-            .selectAll("option")
+            });
+
+        select.selectAll("option")
             .data(years)
             .enter()
             .append("option")
@@ -112,12 +139,9 @@ class IndividualState {
         vis.selectedYear = years[years.length - 1];
     }
 
-    addMetricToggle() {
+    addMetricToggle(container) {
         let vis = this;
-        vis.metricButton = vis.container.append("div")
-            .style("text-align", "center")
-            .style("margin", "10px 0")
-            .append("button")
+        container.append("button")
             .style("padding", "8px 15px")
             .style("font-family", "Patrick Hand")
             .style("cursor", "pointer")
@@ -125,220 +149,272 @@ class IndividualState {
             .style("color", "white")
             .style("border", "none")
             .style("border-radius", "5px")
-            .text(`Rank by ${vis.sortMetric === "avgPrice" ? "Price" : "Volume"}`)
-            .on("click", () => {
+            .text(`Sort by ${vis.sortMetric === "avgPrice" ? "Price" : "Volume"}`)
+            .on("click", function() {
                 vis.sortMetric = vis.sortMetric === "avgPrice" ? "avgVolume" : "avgPrice";
-                vis.metricButton.text(`Rank by ${vis.sortMetric === "avgPrice" ? "Price" : "Volume"}`);
+                d3.select(this).text(`Sort by ${vis.sortMetric === "avgPrice" ? "Price" : "Volume"}`);
                 vis.wrangleData();
             });
     }
 
     wrangleData() {
         let vis = this;
-        vis.wordData = Object.entries(vis.data)
+
+        // Process data for both visualizations
+        vis.processedData = Object.entries(vis.data)
             .filter(([state, _]) => state !== 'ALL')
             .map(([state, stateData]) => {
                 const yearData = stateData.filter(d => d.year === vis.selectedYear);
+                const avgVolume = d3.mean(yearData, d => d.totalVolume) || 0;
+                const avgPrice = d3.mean(yearData, d => d.averagePrice) || 0;
+                const totalVolume = d3.sum(yearData, d => d.totalVolume) || 0;
+                const volumePercentage = (totalVolume / d3.sum(Object.values(vis.data)
+                    .flat()
+                    .filter(d => d.year === vis.selectedYear), d => d.totalVolume)) * 100;
+
                 return {
-                    text: vis.stateMapping[state] || state,
+                    text: vis.stateMapping[state],
+                    state: vis.stateMapping[state],
                     abbreviation: state,
-                    avgPrice: d3.mean(yearData, d => d.averagePrice) || 0,
-                    avgVolume: d3.mean(yearData, d => d.totalVolume) || 0
+                    avgVolume,
+                    avgPrice,
+                    volumePercentage,
+                    value: vis.sortMetric === "avgPrice" ? avgPrice : avgVolume
                 };
             })
             .filter(d => d.avgPrice > 0);
 
-        // Calculate volume ranks
-        let volumeSorted = [...vis.wordData].sort((a, b) => b.avgVolume - a.avgVolume);
-        volumeSorted.forEach((d, i) => {
-            vis.wordData.find(w => w.text === d.text).volumeRank = i + 1;
+        // Sort data
+        vis.processedData.sort((a, b) => b[vis.sortMetric] - a[vis.sortMetric]);
+
+        // Add ranks
+        vis.processedData.forEach((d, i) => {
+            d.rank = i + 1;
         });
 
-        // Calculate price ranks
-        let priceSorted = [...vis.wordData].sort((a, b) => b.avgPrice - a.avgPrice);
-        priceSorted.forEach((d, i) => {
-            vis.wordData.find(w => w.text === d.text).priceRank = i + 1;
+        // Calculate scales
+        vis.sizeScale = d3.scaleSqrt()
+            .domain([0, d3.max(vis.processedData, d => d[vis.sortMetric])])
+            .range([10, 40]);
+
+        vis.colorScale = d3.scaleSequential()
+            .domain([0, d3.max(vis.processedData, d => d[vis.sortMetric])])
+            .interpolator(d3.interpolateRdBu);
+
+        // Calculate sizes for both visualizations
+        vis.processedData.forEach(d => {
+            d.size = vis.sizeScale(d[vis.sortMetric]);
+            d.radius = d.size;
+            d.color = vis.colorScale(d[vis.sortMetric]);
         });
 
-        // Sort by selected metric for display
-        vis.wordData.sort((a, b) => b[vis.sortMetric] - a[vis.sortMetric]);
-
-        const volumeScale = d3.scaleLog()
-            .domain([d3.min(vis.wordData, d => d.avgVolume),
-                d3.max(vis.wordData, d => d.avgVolume)])
-            .range([8, 24]);
-
-        vis.wordData.forEach(d => {
-            d.size = volumeScale(d.avgVolume);
-        });
-
-        vis.updateVis();
+        this.updateVis();
     }
 
     updateVis() {
         let vis = this;
-        vis.svg.selectAll("*").remove();
 
-        // Create scales based on the current sort metric
-        const colorScale = d3.scaleSequential()
-            .domain(d3.extent(vis.wordData, d => vis.sortMetric === "avgPrice" ? d.avgPrice : d.avgVolume).reverse())
-            .interpolator(d3.interpolateRdBu);
+        // Update word cloud
+        this.updateWordCloud();
 
-        const sizeScale = d3.scaleLog()
-            .domain(d3.extent(vis.wordData, d => vis.sortMetric === "avgPrice" ? d.avgVolume : d.avgPrice))
-            .range([8, 24]);
+        // Update circle visualization
+        this.updateCircles();
+    }
 
-        // Update the size property for each word based on the current metric
-        vis.wordData.forEach(d => {
-            d.size = sizeScale(vis.sortMetric === "avgPrice" ? d.avgVolume : d.avgPrice);
-        });
+    updateWordCloud() {
+        let vis = this;
+        const wordCloudWidth = vis.wordCloudContainer.node().getBoundingClientRect().width;
+        const wordCloudHeight = vis.wordCloudContainer.node().getBoundingClientRect().height;
 
+        // Clear previous word cloud
+        vis.wordCloudSvg.selectAll("*").remove();
+
+        const cloud = vis.wordCloudSvg.append("g")
+            .attr("transform", `translate(${wordCloudWidth/2},${wordCloudHeight/2})`);
+
+        // Create word cloud layout
         const layout = d3.layout.cloud()
-            .size([800, 500])
-            .words(vis.wordData)
-            .padding(8)
-            .rotate(() => Math.random() * 90 - 45)
+            .size([wordCloudWidth, wordCloudHeight])
+            .words(vis.processedData)
+            .padding(5)
+            .rotate(() => ~~(Math.random() * 2) * 90)
             .fontSize(d => d.size)
-            .spiral("archimedean")
-            .on("end", draw);
+            .on("end", words => {
+                cloud.selectAll("text")
+                    .data(words)
+                    .enter()
+                    .append("text")
+                    .style("font-family", "Patrick Hand")
+                    .style("fill", d => d.color)
+                    .attr("text-anchor", "middle")
+                    .attr("transform", d => `translate(${d.x},${d.y})rotate(${d.rotate})`)
+                    .attr("font-size", d => `${d.size}px`)
+                    .text(d => d.text)
+                    .on("mouseover", (event, d) => this.showTooltip(event, d))
+                    .on("mouseout", () => this.hideTooltip());
+            });
 
         layout.start();
 
-        function draw(words) {
-            const group = vis.svg.append("g")
-                .attr("transform", "translate(400,250)")
-                .selectAll("text")
-                .data(words)
-                .enter()
-                .append("text")
-                .style("font-family", "Patrick Hand")
-                .style("fill", d => colorScale(vis.sortMetric === "avgPrice" ? d.avgPrice : d.avgVolume))
-                .style("cursor", "pointer")
-                .attr("text-anchor", "middle")
-                .attr("transform", d => `translate(${d.x},${d.y})rotate(${d.rotate})`)
-                .attr("font-size", d => `${d.size}px`)
-                .text(d => d.text)
-                .style("opacity", 0)
-                .on("mouseover", function(event, d) {
-                    d3.select(this)
-                        .transition()
-                        .duration(200)
-                        .style("font-size", `${d.size * 1.2}px`)
-                        .style("font-weight", "bold");
+        // Add legend
+        this.addWordCloudLegend();
+    }
 
-                    vis.tooltip
-                        .style("opacity", 1)
-                        .style("left", (event.pageX + 10) + "px")
-                        .style("top", (event.pageY - 10) + "px")
-                        .html(`
-                        <div style="font-family: Patrick Hand">
-                            <strong>${d.text} (${d.abbreviation})</strong><br/>
-                            Price: $${d.avgPrice.toFixed(2)} (Rank: ${d.priceRank}/${vis.wordData.length})<br/>
-                            Volume: ${d3.format(",")(Math.round(d.avgVolume))} (Rank: ${d.volumeRank}/${vis.wordData.length})
-                        </div>
-                    `);
-                })
-                .on("mouseout", function(event, d) {
-                    d3.select(this)
-                        .transition()
-                        .duration(200)
-                        .style("font-size", `${d.size}px`)
-                        .style("font-weight", "normal");
+    addWordCloudLegend() {
+        let vis = this;
+        const legend = vis.wordCloudSvg.append("g")
+            .attr("class", "legend")
+            .attr("transform", `translate(${vis.width/2 - 100}, 50)`);
 
-                    vis.tooltip.style("opacity", 0);
-                });
+        // Color legend
+        legend.append("text")
+            .attr("x", 0)
+            .attr("y", -10)
+            .style("font-family", "Patrick Hand")
+            .text(`${vis.sortMetric === "avgPrice" ? "Price" : "Volume"} Range`);
 
-            // Add legend
-            const legend = vis.svg.append("g")
-                .attr("class", "legend")
-                .attr("transform", "translate(650, 50)");
+        const gradient = legend.append("defs")
+            .append("linearGradient")
+            .attr("id", "color-gradient")
+            .attr("x1", "0%")
+            .attr("y1", "100%")
+            .attr("x2", "0%")
+            .attr("y2", "0%");
 
-            // Color legend
+        gradient.append("stop")
+            .attr("offset", "0%")
+            .attr("stop-color", vis.colorScale(0));
+
+        gradient.append("stop")
+            .attr("offset", "100%")
+            .attr("stop-color", vis.colorScale(d3.max(vis.processedData, d => d[vis.sortMetric])));
+
+        legend.append("rect")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", 20)
+            .attr("height", 100)
+            .style("fill", "url(#color-gradient)");
+
+        // Add labels
+        const extent = d3.extent(vis.processedData, d => d[vis.sortMetric]);
+        legend.append("text")
+            .attr("x", 25)
+            .attr("y", 10)
+            .style("font-family", "Patrick Hand")
+            .text(vis.sortMetric === "avgPrice" ?
+                `High: $${extent[1].toFixed(2)}` :
+                `High: ${d3.format(",")(Math.round(extent[1]))}`);
+
+        legend.append("text")
+            .attr("x", 25)
+            .attr("y", 90)
+            .style("font-family", "Patrick Hand")
+            .text(vis.sortMetric === "avgPrice" ?
+                `Low: $${extent[0].toFixed(2)}` :
+                `Low: ${d3.format(",")(Math.round(extent[0]))}`);
+    }
+
+    updateCircles() {
+        let vis = this;
+
+        // Clear previous circles
+        vis.circleSvg.selectAll("*").remove();
+
+        // Create circles
+        const circles = vis.circleSvg.selectAll(".state-circle")
+            .data(vis.processedData)
+            .enter()
+            .append("g")
+            .attr("class", "state-circle");
+
+        circles.append("circle")
+            .attr("r", d => d.radius)
+            .style("fill", d => d.color)
+            .style("stroke", "#fff")
+            .style("stroke-width", 1)
+            .style("cursor", "pointer")
+            .on("mouseover", (event, d) => this.showTooltip(event, d))
+            .on("mouseout", () => this.hideTooltip());
+
+        circles.append("text")
+            .attr("text-anchor", "middle")
+            .attr("dy", "0.35em")
+            .style("font-family", "Patrick Hand")
+            .style("fill", "#fff")
+            .style("font-size", d => `${d.radius/2}px`)
+            .text(d => d.abbreviation);
+
+        // Add legend for circles
+        this.addCircleLegend();
+
+        // Update simulation
+        vis.simulation
+            .nodes(vis.processedData)
+            .force("collide", d3.forceCollide().radius(d => d.radius + 2))
+            .alpha(1)
+            .restart();
+    }
+
+    addCircleLegend() {
+        let vis = this;
+        const legend = vis.circleSvg.append("g")
+            .attr("class", "circle-legend")
+            .attr("transform", `translate(${vis.width/4 - 100}, ${-vis.height/3})`);
+
+        // Size legend
+        legend.append("text")
+            .attr("x", 0)
+            .attr("y", -20)
+            .style("font-family", "Patrick Hand")
+            .text("Market Share");
+
+        const sizes = [0.1, 1, 5]; // Example percentages
+        sizes.forEach((size, i) => {
+            const y = i * 50;
+            const radius = vis.sizeScale(size);
+
+            legend.append("circle")
+                .attr("cx", radius)
+                .attr("cy", y + radius)
+                .attr("r", radius)
+                .style("fill", "none")
+                .style("stroke", "#666")
+                .style("stroke-dasharray", "2,2");
+
             legend.append("text")
-                .attr("x", 0)
-                .attr("y", -10)
+                .attr("x", radius * 2 + 10)
+                .attr("y", y + radius)
+                .attr("dy", "0.35em")
                 .style("font-family", "Patrick Hand")
-                .text(`${vis.sortMetric === "avgPrice" ? "Price" : "Volume"} range`);
+                .text(`${size}%`);
+        });
+    }
 
-            const colorLegend = legend.append("g");
-            const gradient = vis.svg.append("defs")
-                .append("linearGradient")
-                .attr("id", "color-gradient")
-                .attr("y1", "0%")
-                .attr("y2", "100%");
+    showTooltip(event, d) {
+        let vis = this;
+        vis.tooltip
+            .style("opacity", 1)
+            .style("left", (event.pageX + 10) + "px")
+            .style("top", (event.pageY - 10) + "px")
+            .html(`
+                <div style="font-family: Patrick Hand">
+                    <strong>${d.state} (${d.abbreviation})</strong><br/>
+                    Rank: ${d.rank} of ${vis.processedData.length}<br/>
+                    Volume: ${d3.format(",")(Math.round(d.avgVolume))}<br/>
+                    Price: $${d.avgPrice.toFixed(2)}<br/>
+                    Market Share: ${d.volumePercentage.toFixed(2)}%
+                </div>
+            `);
+    }
 
-            gradient.append("stop")
-                .attr("offset", "0%")
-                .attr("stop-color", 'red');
-            gradient.append("stop")
-                .attr("offset", "100%")
-                .attr("stop-color", 'blue');
+    hideTooltip() {
+        this.tooltip.style("opacity", 0);
+    }
 
-            colorLegend.append("rect")
-                .attr("width", 20)
-                .attr("height", 100)
-                .style("fill", "url(#color-gradient)");
-
-            const metricExtent = d3.extent(vis.wordData, d =>
-                vis.sortMetric === "avgPrice" ? d.avgPrice : d.avgVolume);
-
-            colorLegend.append("text")
-                .attr("x", 25)
-                .attr("y", 10)
-                .style("font-family", "Patrick Hand")
-                .text(vis.sortMetric === "avgPrice" ?
-                    `High: $${metricExtent[1].toFixed(2)}` :
-                    `High: ${d3.format(",")(Math.round(metricExtent[1]))}`);
-
-            colorLegend.append("text")
-                .attr("x", 25)
-                .attr("y", 95)
-                .style("font-family", "Patrick Hand")
-                .text(vis.sortMetric === "avgPrice" ?
-                    `Low: $${metricExtent[0].toFixed(2)}` :
-                    `Low: ${d3.format(",")(Math.round(metricExtent[0]))}`);
-
-            // Size legend
-            const sizeMetricExtent = d3.extent(vis.wordData, d =>
-                vis.sortMetric === "avgPrice" ? d.avgVolume : d.avgPrice);
-
-            const sizeLegend = legend.append("g")
-                .attr("transform", "translate(0, 150)");
-
-            sizeLegend.append("text")
-                .attr("x", 0)
-                .attr("y", -10)
-                .style("font-family", "Patrick Hand")
-                .text(`${vis.sortMetric === "avgPrice" ? "Volume" : "Price"} range`);
-
-            // Example sizes
-            [20, 40, 60].forEach((size, i) => {
-                const y = i * 40 + 20;
-                sizeLegend.append("text")
-                    .attr("x", 0)
-                    .attr("y", y)
-                    .style("font-family", "Patrick Hand")
-                    .style("font-size", size)
-                    .text("Aa");
-
-                const value = d3.scaleLinear()
-                    .domain([0, 2])
-                    .range([sizeMetricExtent[0], sizeMetricExtent[1]])(i);
-
-                sizeLegend.append("text")
-                    .attr("x", 50)
-                    .attr("y", y)
-                    .style("font-family", "Patrick Hand")
-                    .text(vis.sortMetric === "avgPrice" ?
-                        d3.format(".2s")(value) :
-                        `$${value.toFixed(2)}`);
-            });
-
-            // Animate words
-            group.transition()
-                .delay((d, i) => i * 20)
-                .duration(1000)
-                .style("opacity", 1);
-        }
+    ticked() {
+        let vis = this;
+        vis.circleSvg.selectAll(".state-circle")
+            .attr("transform", d => `translate(${d.x},${d.y})`);
     }
 }
