@@ -122,19 +122,30 @@
 }
 
 /* Welcome section */
-#welcome {
+#welcome1 {
     background-color: #ddd48f;
 }
 
-.welcome-content {
+.welcome-content1 {
+    color: #4a7337;
+    height: 100%; !important;
+    width: 100%;!important;
+}
+
+.welcome-content1 h1 {
     text-align: center;
+    font-size: 5rem;
+    margin-bottom: 1rem;
     color: #4a7337;
 }
 
-.welcome-content h1 {
-    font-size: 4rem;
-    margin-bottom: 1rem;
+.welcome-content1 p {
+    /*text-align: left; !important;*/
+    font-size: 2rem;
+    font-family: 'Caveat';
 }
+
+
 
 /* Visualization-specific styles */
 #price-vis, #state-vis, #multi-state-vis, #correlation-vis{
