@@ -84,8 +84,8 @@ avocadogogo/
 ```
 
 ## Data Source
-Data provided by the Hass Avocado Board Statistics, offering comprehensive information about avocado prices and sales volumes across the United States.
-
+Data provided by the Hass Avocado Board Statistics(https://hassavocadoboard.com/), offering comprehensive information about avocado prices and sales volumes across the United States.
+The dataset includes 13 variables and 18249 observations. The variables are ```Date```, ```AveragePrice```, ```Total Volume```, avocado volume of three different sizes (```4046```, ```4225```, ```4770```), ```Total Bags```, ```Small Bags```, ```Large Bags```, ```XL Large Bags```, ```type```(organic/conventional), ```year```, ```region```(a mix of state name and city name, we preprocessed this in our codes).
 ## Authors
 - **Hanqi(Hanna) Zeng** - *Data Engineer*
 - **Tianshu(Rose) Luo** - *Data Scientist*
