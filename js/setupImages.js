@@ -9,7 +9,6 @@ function setupBackgroundImages() {
     // Set up scroll dot images
     const regularScrollDot = `${basePath}/img/icons/icon8.png`;
     const activeScrollDot = `${basePath}/img/icons/icon7.png`;
-    const avocadoSlider = `${basePath}/img/icons/icon3.png`;
 
     // Update scroll dots
     const dots = document.querySelectorAll('.scroll-dot');
@@ -23,11 +22,6 @@ function setupBackgroundImages() {
         dot.style.backgroundImage = `url('${activeScrollDot}')`;
     });
 
-    // Set up slider handles
-    const sliderHandles = document.querySelectorAll('.noUi-handle');
-    sliderHandles.forEach(handle => {
-        handle.style.backgroundImage = `url('${avocadoSlider}')`;
-    });
 
     // Add observer for scroll dot changes
     const observer = new MutationObserver((mutations) => {

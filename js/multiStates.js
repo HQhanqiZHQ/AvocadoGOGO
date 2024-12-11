@@ -814,6 +814,12 @@ class MultiStates {
                 rangeValue.textContent = formatRangeDisplay(values);
             });
 
+            const sliderHandles = slider.querySelectorAll('.noUi-handle');
+            sliderHandles.forEach(handle => {
+                handle.style.backgroundImage = "url('/img/icons/icon3.png')";
+                console.log("Set up slider handles");
+            });
+
             const connect = slider.querySelector('.noUi-connect');
 
             connect.addEventListener('mousedown', function (e) {
