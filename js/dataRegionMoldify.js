@@ -1,6 +1,4 @@
 // dataRegionMoldigy.js
-console.log("in main")
-
 const stateNameToAbbr = {
     'Alabama': 'AL',
     'Alaska': 'AK',
