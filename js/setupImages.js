@@ -9,7 +9,7 @@ function setupBackgroundImages() {
     // Set up scroll dot images
     const regularScrollDot = `${basePath}/img/icons/icon8.png`;
     const activeScrollDot = `${basePath}/img/icons/icon7.png`;
-    const avocadoSlider = `${basePath}/img/icons/avocadoslider.png`;
+    const avocadoSlider = `${basePath}/img/icons/icon3.png`;
 
     // Update scroll dots
     const dots = document.querySelectorAll('.scroll-dot');

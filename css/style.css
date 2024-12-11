@@ -60,7 +60,7 @@
     height: 20px; /* Adjusted for icon size */
     border: none;
     background-color: transparent;
-    background-image: url('/img/icons/icon8.png');
+    /*background-image: url('/img/icons/icon8.png');*/
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -77,13 +77,13 @@
 
 /* Update active state to use the completed icon */
 .scroll-dot.active {
-    background-image: url('/img/icons/icon7.png');
+    /*background-image: url('/img/icons/icon7.png');*/
     transform: scale(1.1);
 }
 
 /* Add visited state */
 .scroll-dot.visited {
-    background-image: url('/img/icons/icon7.png');
+    /*background-image: url('/img/icons/icon7.png');*/
 }
 
 /* Keep existing scroll button styles */
@@ -386,7 +386,7 @@
 /* Handle styling for both handles */
 .noUi-handle[data-handle="0"],
 .noUi-handle[data-handle="1"] {
-    background-image: url('/img/icons/icon3.png');
+    /*background-image: url('/img/icons/icon3.png');*/
     background-size: contain; /* Make image fit the handle */
     background-repeat: no-repeat;
     background-position: center;
