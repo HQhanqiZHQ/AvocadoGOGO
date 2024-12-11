@@ -76,6 +76,7 @@ avocadogogo/
 │   ├── individualState.js
 │   ├── multiStates.js
 │   ├── priceVis.js
+│   ├── setupImage.js # Centralizes Image URL Management
 │   └── treeVis.js
 ├── img/
 │   └── icons/         # UI icons
