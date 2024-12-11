@@ -6,56 +6,19 @@ class IndividualState {
         this.sortMetric = "avgVolume"; // Default sort by volume
         // Add state name mapping
         this.stateMapping = {
-            'AL': 'Alabama',
-            'AK': 'Alaska',
-            'AZ': 'Arizona',
-            'AR': 'Arkansas',
-            'CA': 'California',
-            'CO': 'Colorado',
-            'CT': 'Connecticut',
-            'DE': 'Delaware',
-            'FL': 'Florida',
-            'GA': 'Georgia',
-            'HI': 'Hawaii',
-            'ID': 'Idaho',
-            'IL': 'Illinois',
-            'IN': 'Indiana',
-            'IA': 'Iowa',
-            'KS': 'Kansas',
-            'KY': 'Kentucky',
-            'LA': 'Louisiana',
-            'ME': 'Maine',
-            'MD': 'Maryland',
-            'MA': 'Massachusetts',
-            'MI': 'Michigan',
-            'MN': 'Minnesota',
-            'MS': 'Mississippi',
-            'MO': 'Missouri',
-            'MT': 'Montana',
-            'NE': 'Nebraska',
-            'NV': 'Nevada',
-            'NH': 'New Hampshire',
-            'NJ': 'New Jersey',
-            'NM': 'New Mexico',
-            'NY': 'New York',
-            'NC': 'North Carolina',
-            'ND': 'North Dakota',
-            'OH': 'Ohio',
-            'OK': 'Oklahoma',
-            'OR': 'Oregon',
-            'PA': 'Pennsylvania',
-            'RI': 'Rhode Island',
-            'SC': 'South Carolina',
-            'SD': 'South Dakota',
-            'TN': 'Tennessee',
-            'TX': 'Texas',
-            'UT': 'Utah',
-            'VT': 'Vermont',
-            'VA': 'Virginia',
-            'WA': 'Washington',
-            'WV': 'West Virginia',
-            'WI': 'Wisconsin',
-            'WY': 'Wyoming'
+            'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas',
+            'CA': 'California', 'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware',
+            'FL': 'Florida', 'GA': 'Georgia', 'HI': 'Hawaii', 'ID': 'Idaho',
+            'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa', 'KS': 'Kansas',
+            'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
+            'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi',
+            'MO': 'Missouri', 'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada',
+            'NH': 'New Hampshire', 'NJ': 'New Jersey', 'NM': 'New Mexico', 'NY': 'New York',
+            'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio', 'OK': 'Oklahoma',
+            'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
+            'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah',
+            'VT': 'Vermont', 'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia',
+            'WI': 'Wisconsin', 'WY': 'Wyoming'
         };
         this.initVis();
     }
@@ -177,18 +140,28 @@ class IndividualState {
             .map(([state, stateData]) => {
                 const yearData = stateData.filter(d => d.year === vis.selectedYear);
                 return {
-                    text: vis.stateMapping[state] || state, // Use full state name
-                    abbreviation: state, // Keep abbreviation for tooltip
+                    text: vis.stateMapping[state] || state,
+                    abbreviation: state,
                     avgPrice: d3.mean(yearData, d => d.averagePrice) || 0,
                     avgVolume: d3.mean(yearData, d => d.totalVolume) || 0
                 };
             })
-            .filter(d => d.avgPrice > 0)
-            .sort((a, b) => b[vis.sortMetric] - a[vis.sortMetric]);
+            .filter(d => d.avgPrice > 0);
 
-        vis.wordData.forEach((d, i) => {
-            d.rank = i + 1;
+        // Calculate volume ranks
+        let volumeSorted = [...vis.wordData].sort((a, b) => b.avgVolume - a.avgVolume);
+        volumeSorted.forEach((d, i) => {
+            vis.wordData.find(w => w.text === d.text).volumeRank = i + 1;
         });
+
+        // Calculate price ranks
+        let priceSorted = [...vis.wordData].sort((a, b) => b.avgPrice - a.avgPrice);
+        priceSorted.forEach((d, i) => {
+            vis.wordData.find(w => w.text === d.text).priceRank = i + 1;
+        });
+
+        // Sort by selected metric for display
+        vis.wordData.sort((a, b) => b[vis.sortMetric] - a[vis.sortMetric]);
 
         const volumeScale = d3.scaleLog()
             .domain([d3.min(vis.wordData, d => d.avgVolume),
@@ -206,11 +179,25 @@ class IndividualState {
         let vis = this;
         vis.svg.selectAll("*").remove();
 
+        // Create scales based on the current sort metric
+        const colorScale = d3.scaleSequential()
+            .domain(d3.extent(vis.wordData, d => vis.sortMetric === "avgPrice" ? d.avgPrice : d.avgVolume).reverse())
+            .interpolator(d3.interpolateRdBu);
+
+        const sizeScale = d3.scaleLog()
+            .domain(d3.extent(vis.wordData, d => vis.sortMetric === "avgPrice" ? d.avgVolume : d.avgPrice))
+            .range([8, 24]);
+
+        // Update the size property for each word based on the current metric
+        vis.wordData.forEach(d => {
+            d.size = sizeScale(vis.sortMetric === "avgPrice" ? d.avgVolume : d.avgPrice);
+        });
+
         const layout = d3.layout.cloud()
             .size([800, 500])
             .words(vis.wordData)
             .padding(8)
-            .rotate(() => Math.random() * 90 - 45) // Random angle between -45 and 45 degrees
+            .rotate(() => Math.random() * 90 - 45)
             .fontSize(d => d.size)
             .spiral("archimedean")
             .on("end", draw);
@@ -218,10 +205,6 @@ class IndividualState {
         layout.start();
 
         function draw(words) {
-            const colorScale = d3.scaleSequential()
-                .domain(d3.extent(vis.wordData, d => d.avgPrice).reverse())
-                .interpolator(d3.interpolateRdBu)
-
             const group = vis.svg.append("g")
                 .attr("transform", "translate(400,250)")
                 .selectAll("text")
@@ -229,7 +212,7 @@ class IndividualState {
                 .enter()
                 .append("text")
                 .style("font-family", "Patrick Hand")
-                .style("fill", d => colorScale(d.avgPrice))
+                .style("fill", d => colorScale(vis.sortMetric === "avgPrice" ? d.avgPrice : d.avgVolume))
                 .style("cursor", "pointer")
                 .attr("text-anchor", "middle")
                 .attr("transform", d => `translate(${d.x},${d.y})rotate(${d.rotate})`)
@@ -248,13 +231,12 @@ class IndividualState {
                         .style("left", (event.pageX + 10) + "px")
                         .style("top", (event.pageY - 10) + "px")
                         .html(`
-                            <div style="font-family: Patrick Hand">
-                                <strong>${d.text} (${d.abbreviation})</strong><br/>
-                                Price: $${d.avgPrice.toFixed(2)}<br/>
-                                Volume: ${d3.format(",")(Math.round(d.avgVolume))}<br/>
-                                Rank by ${vis.sortMetric === "avgPrice" ? "Price" : "Volume"}: ${d.rank}/${vis.wordData.length}
-                            </div>
-                        `);
+                        <div style="font-family: Patrick Hand">
+                            <strong>${d.text} (${d.abbreviation})</strong><br/>
+                            Price: $${d.avgPrice.toFixed(2)} (Rank: ${d.priceRank}/${vis.wordData.length})<br/>
+                            Volume: ${d3.format(",")(Math.round(d.avgVolume))} (Rank: ${d.volumeRank}/${vis.wordData.length})
+                        </div>
+                    `);
                 })
                 .on("mouseout", function(event, d) {
                     d3.select(this)
@@ -287,7 +269,7 @@ class IndividualState {
 
             gradient.append("stop")
                 .attr("offset", "0%")
-                .attr("stop-color", 'red'); // high
+                .attr("stop-color", 'red');
             gradient.append("stop")
                 .attr("offset", "100%")
                 .attr("stop-color", 'blue');
@@ -297,21 +279,29 @@ class IndividualState {
                 .attr("height", 100)
                 .style("fill", "url(#color-gradient)");
 
-            const priceExtent = d3.extent(vis.wordData, d => d.avgPrice);
+            const metricExtent = d3.extent(vis.wordData, d =>
+                vis.sortMetric === "avgPrice" ? d.avgPrice : d.avgVolume);
+
             colorLegend.append("text")
                 .attr("x", 25)
                 .attr("y", 10)
                 .style("font-family", "Patrick Hand")
-                .text(`High: $${priceExtent[1].toFixed(2)}`);
+                .text(vis.sortMetric === "avgPrice" ?
+                    `High: $${metricExtent[1].toFixed(2)}` :
+                    `High: ${d3.format(",")(Math.round(metricExtent[1]))}`);
 
             colorLegend.append("text")
                 .attr("x", 25)
                 .attr("y", 95)
                 .style("font-family", "Patrick Hand")
-                .text(`Low: $${priceExtent[0].toFixed(2)}`);
+                .text(vis.sortMetric === "avgPrice" ?
+                    `Low: $${metricExtent[0].toFixed(2)}` :
+                    `Low: ${d3.format(",")(Math.round(metricExtent[0]))}`);
 
             // Size legend
-            const volumeExtent = d3.extent(vis.wordData, d => d.avgVolume);
+            const sizeMetricExtent = d3.extent(vis.wordData, d =>
+                vis.sortMetric === "avgPrice" ? d.avgVolume : d.avgPrice);
+
             const sizeLegend = legend.append("g")
                 .attr("transform", "translate(0, 150)");
 
@@ -331,15 +321,17 @@ class IndividualState {
                     .style("font-size", size)
                     .text("Aa");
 
+                const value = d3.scaleLinear()
+                    .domain([0, 2])
+                    .range([sizeMetricExtent[0], sizeMetricExtent[1]])(i);
+
                 sizeLegend.append("text")
                     .attr("x", 50)
                     .attr("y", y)
                     .style("font-family", "Patrick Hand")
-                    .text(d3.format(".2s")(
-                        d3.scaleLinear()
-                            .domain([0, 2])
-                            .range([volumeExtent[0], volumeExtent[1]])(i)
-                    ));
+                    .text(vis.sortMetric === "avgPrice" ?
+                        d3.format(".2s")(value) :
+                        `$${value.toFixed(2)}`);
             });
 
             // Animate words
