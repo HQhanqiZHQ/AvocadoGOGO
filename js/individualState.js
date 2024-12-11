@@ -207,7 +207,11 @@ class IndividualState {
             .range([10, 40]);
 
         vis.colorScale = d3.scaleSequential()
-            .domain([0, d3.max(vis.processedData, d => d[vis.sortMetric])])
+            .domain([
+                d3.min(vis.processedData, d => d[vis.sortMetric]),
+                d3.mean(vis.processedData, d => d[vis.sortMetric]),
+                d3.max(vis.processedData, d => d[vis.sortMetric])
+            ])
             .interpolator(d3.interpolateRdBu);
 
         // Calculate sizes for both visualizations
