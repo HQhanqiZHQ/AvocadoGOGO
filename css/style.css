@@ -386,7 +386,7 @@
 /* Handle styling for both handles */
 .noUi-handle[data-handle="0"],
 .noUi-handle[data-handle="1"] {
-    background-image: url('img/icons/avocado slider.png');
+    background-image: url('img/icons/avocadoslider.png');
     background-size: contain; /* Make image fit the handle */
     background-repeat: no-repeat;
     background-position: center;

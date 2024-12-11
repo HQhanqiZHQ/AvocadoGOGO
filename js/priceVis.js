@@ -337,7 +337,7 @@ class PriceVisualization {
 
         // Add avocado icons
         iconsEnter.append("image")
-            .attr("xlink:href", "img/icons/avocado slider.png")
+            .attr("xlink:href", "img/icons/avocadoslider.png")
             .attr("width", vis.iconSize)
             .attr("height", vis.iconSize)
             .attr("clip-path", "url(#clip)");
