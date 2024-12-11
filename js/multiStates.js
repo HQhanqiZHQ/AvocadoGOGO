@@ -816,7 +816,7 @@ class MultiStates {
 
             const sliderHandles = slider.querySelectorAll('.noUi-handle');
             sliderHandles.forEach(handle => {
-                handle.style.backgroundImage = "url('/img/icons/icon3.png')";
+                handle.style.backgroundImage = "url('/AvocadoGOGO/img/icons/icon3.png')";
             });
 
             const connect = slider.querySelector('.noUi-connect');
