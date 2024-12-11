@@ -45,7 +45,7 @@ http://localhost:8000
 - D3.js v7.0.0
 - Bootstrap v5.2.2
 - noUiSlider v14.7.0
-- D3-Cloud
+- D3-cloud
 
 ### CDN Links
 ```html
@@ -56,6 +56,8 @@ http://localhost:8000
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 <script src="https://d3js.org/topojson.v2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.7.0/nouislider.min.js"></script>
+
 
 <!-- noUiSlider -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.7.0/nouislider.min.css">
