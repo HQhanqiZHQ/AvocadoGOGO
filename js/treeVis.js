@@ -75,7 +75,7 @@ class TreeVis {
 
         vis.barChartGroup = vis.svg.append("g")
             .attr("class", "bar-chart-group")
-            .attr("transform", `translate(20,${vis.height * 0.9})`);
+            .attr("transform", `translate(20,${vis.height * 0.85})`);
 
         // Create tooltip
         vis.tooltip = d3.select("body").append("div")
