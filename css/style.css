@@ -1,7 +1,8 @@
 /* Section styles */
 .full-height {
     min-height: 100vh;
-    width: 100%;
+    /*width: 100%;*/
+    max-width: 1200px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -127,6 +128,10 @@
 #price-vis, #state-vis, #multi-state-vis, #correlation-vis{
     border: 1px solid #eee;
     padding: 0px;
+}
+#correlation-vis {
+    margin: 0 auto;  /* Center the visualization */
+    display: block;  /* Ensure block display for margin auto to work */
 }
 
 .state {
@@ -495,15 +500,20 @@
 .narrative-special {
     padding: 15px;
     border-radius: 8px;
-    margin-left: 5px;
-    margin-right: 100px;
+    margin-left: auto;  /* Changed from 5px */
+    margin-right: auto; /* Changed from 100px */
+    margin-top: 20px;   /* Added for spacing */
+    margin-bottom: 20px;/* Added for spacing */
     background-color: lightyellow;
+    max-width: 800px;   /* Added to control width */
+    text-align: center; /* Added for text alignment */
 }
 
-narrative-special p{
+.narrative-special p {
     font-family: 'Patrick Hand', cursive;
-    font-size: 0.5rem;
+    font-size: 20px;    /* Moved from inline style */
     line-height: 1.6;
+    margin: 0;          /* Remove default margins */
 }
 
 .price-area {

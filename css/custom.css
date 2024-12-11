@@ -487,6 +487,14 @@ main{
     margin: 1rem 0;
 }
 
+
+#seasonal .narrative-block ul {
+    text-align: left;    /* Keep list items left-aligned */
+    display: inline-block;  /* Allow the list to be centered while maintaining left text alignment */
+    margin: 0 auto;      /* Center the list */
+}
+
+
 .member-quote {
     font-style: italic;
     color: #666;
