@@ -197,14 +197,27 @@ class IndividualState {
             .domain([0, d3.max(vis.processedData, d => d[vis.sortMetric])])
             .range([10, 40]);
 
+        // Calculate scales for different metrics
+        vis.volumeSizeScale = d3.scaleSqrt()
+            .domain([0, d3.max(vis.processedData, d => d.volumePercentage)])
+            .range([10, 40]);
+
+        vis.priceSizeScale = d3.scaleSqrt()
+            .domain([0, d3.max(vis.processedData, d => d.avgPrice)])
+            .range([10, 40]);
+
         vis.colorScale = d3.scaleSequential()
             .domain([0, d3.max(vis.processedData, d => d[vis.sortMetric])])
             .interpolator(d3.interpolateRdBu);
 
         // Calculate sizes for both visualizations
         vis.processedData.forEach(d => {
+            // Word cloud size based on selected metric
             d.size = vis.sizeScale(d[vis.sortMetric]);
-            d.radius = d.size;
+
+            // Circle size should always be based on market share (volume percentage)
+            d.radius = vis.volumeSizeScale(d.volumePercentage);
+
             d.color = vis.colorScale(d[vis.sortMetric]);
         });
 
