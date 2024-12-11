@@ -25,7 +25,6 @@ class IndividualState {
     initVis() {
         let vis = this;
 
-        // Main container setup
         vis.container = d3.select(vis.parentElement)
             .append("div")
             .attr("class", "state-visualization-container")
@@ -33,7 +32,9 @@ class IndividualState {
             .style("background-color", "#ffffff")
             .style("border-radius", "8px")
             .style("box-shadow", "0 2px 4px rgba(0,0,0,0.1)")
-            .style("padding", "20px");
+            .style("padding", "40px")  // Increase padding
+            .style("max-width", "1400px")  // Set max-width
+            .style("margin", "0 auto")
 
         vis.width = 800;
         vis.height = 600;
@@ -53,7 +54,7 @@ class IndividualState {
             .style("display", "flex")
             .style("justify-content", "center")
             .style("gap", "20px")
-            .style("margin-bottom", "20px");
+            .style("margin-bottom", "40px");
 
         // Add controls
         this.addYearSelector(controlsContainer);
@@ -64,19 +65,20 @@ class IndividualState {
             .attr("class", "visualizations-container")
             .style("display", "flex")
             .style("justify-content", "space-between")
-            .style("margin-top", "20px");
+            .style("height", "500px")  // Set fixed height
+            .style("margin-bottom", "40px");  // Add margin before the text
 
         // Word cloud container
         vis.wordCloudContainer = visContainer.append("div")
             .attr("class", "word-cloud-container")
             .style("width", "50%")
-            .style("height", "600px");
+            .style("height", "100%");
 
         // Circle visualization container
         vis.circleContainer = visContainer.append("div")
             .attr("class", "circle-container")
             .style("width", "50%")
-            .style("height", "600px");
+            .style("height", "100%");
 
         // Initialize SVGs
         vis.wordCloudSvg = vis.wordCloudContainer.append("svg")
@@ -281,7 +283,7 @@ class IndividualState {
         let vis = this;
         const legend = vis.wordCloudSvg.append("g")
             .attr("class", "legend")
-            .attr("transform", `translate(${vis.width/2 - 100}, 50)`);
+            .attr("transform", "translate(20, 20)");  // coordinates to top-left
 
         // Color legend
         legend.append("text")
@@ -377,19 +379,25 @@ class IndividualState {
         let vis = this;
         const legend = vis.circleSvg.append("g")
             .attr("class", "circle-legend")
-            .attr("transform", `translate(${vis.width/4 - 100}, ${-vis.height/3})`);
+            .attr("transform", `translate(${vis.width/2 - 250}, -250)`);
 
-        // Size legend
         legend.append("text")
             .attr("x", 0)
             .attr("y", -20)
             .style("font-family", "Patrick Hand")
             .text("Market Share");
 
-        const sizes = [0.1, 1, 5]; // Example percentages
+        // Calculate dynamic size values based on actual data
+        const maxValue = d3.max(vis.processedData, d => d.volumePercentage);
+        const sizes = [
+            maxValue * 0.1,  // Small - 10% of max
+            maxValue * 0.5,  // Medium - 50% of max
+            maxValue        // Large - max value
+        ];
+
         sizes.forEach((size, i) => {
             const y = i * 50;
-            const radius = vis.sizeScale(size);
+            const radius = vis.volumeSizeScale(size);
 
             legend.append("circle")
                 .attr("cx", radius)
@@ -404,10 +412,9 @@ class IndividualState {
                 .attr("y", y + radius)
                 .attr("dy", "0.35em")
                 .style("font-family", "Patrick Hand")
-                .text(`${size}%`);
+                .text(`${size.toFixed(2)}%`);
         });
     }
-
     showTooltip(event, d) {
         let vis = this;
         vis.tooltip
