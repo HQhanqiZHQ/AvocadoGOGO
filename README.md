@@ -1,4 +1,4 @@
-# AvocadoGOGO - Interactive Avocado Market Analysis for fruit market owners
+# AvocadoGOGO - Interactive Avocado Market Analysis
 
 ## Live Demo
 Visit our live deployment: [AvocadoGOGO ](https://hqhanqizhq.github.io/AvocadoGOGO/)
