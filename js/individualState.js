@@ -108,7 +108,7 @@ class IndividualState {
 
         // Initialize force simulation for circles
         vis.simulation = d3.forceSimulation()
-            .force("center", d3.forceCenter(0, 0))
+            .force("center", d3.forceCenter(0, -50))
             .force("charge", d3.forceManyBody().strength(50))
             .force("collide", d3.forceCollide().radius(d => d.radius + 2))
             .on("tick", () => vis.ticked());
@@ -379,7 +379,7 @@ class IndividualState {
         let vis = this;
         const legend = vis.circleSvg.append("g")
             .attr("class", "circle-legend")
-            .attr("transform", `translate(${vis.width/2 - 250}, -250)`);
+            .attr("transform", `translate(${vis.width/2 - 300}, -250)`);
 
         legend.append("text")
             .attr("x", 0)
@@ -395,13 +395,13 @@ class IndividualState {
             maxValue        // Large - max value
         ];
 
+        let currentY = 0;
         sizes.forEach((size, i) => {
-            const y = i * 50;
             const radius = vis.volumeSizeScale(size);
-
+            currentY += radius*2;
             legend.append("circle")
                 .attr("cx", radius)
-                .attr("cy", y + radius)
+                .attr("cy", currentY)
                 .attr("r", radius)
                 .style("fill", "none")
                 .style("stroke", "#666")
@@ -409,7 +409,7 @@ class IndividualState {
 
             legend.append("text")
                 .attr("x", radius * 2 + 10)
-                .attr("y", y + radius)
+                .attr("y", currentY)
                 .attr("dy", "0.35em")
                 .style("font-family", "Patrick Hand")
                 .text(`${size.toFixed(2)}%`);
